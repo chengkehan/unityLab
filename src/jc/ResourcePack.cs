@@ -327,13 +327,18 @@ public class ResourcePack : ScriptableWizard
 
     private bool GetDirectoryAssets(string directory, string save, bool recursive, List<Object> assetList, List<string> nameList, List<string> nameList2, string dirRoot)
     {
+        if (IsExclude(directory))
+        {
+            return true;
+        }
+
         try
         {
             string[] fileList = Directory.GetFiles(URL.dataPath + "/" + directory);
             int dataPathLength = URL.dataPath.Length;
             foreach (string file in fileList)
             {
-                if (IsExcludeFile(file))
+                if (IsExclude(file))
                 {
                     continue;
                 }
@@ -378,7 +383,7 @@ public class ResourcePack : ScriptableWizard
         return true;
     }
 
-    private bool IsExcludeFile(string file)
+    private bool IsExclude(string file)
     {
         if (excludeList == null)
         {

@@ -1,4 +1,4 @@
-<resourcePack exclude="meta">
+<resourcePack exclude="meta;svn">
 	<!--
 	<resource id="0" type="File" binding="true">
 		<save><![CDATA[StreamingAssets/u3d000.unity3d]]></save>
@@ -20,7 +20,7 @@
 		</item>
 	</resource>
 	-->
-	<resource id="1" type="Directory" binding="false" recursive="true">
+	<resource id="1" type="Directory" binding="true" recursive="true">
 		<save><![CDATA[StreamingAssets/u3d000.unity3d]]></save>
 		<item>
 			<path><![CDATA[src/jc]]></path>
