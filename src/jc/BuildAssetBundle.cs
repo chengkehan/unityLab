@@ -95,7 +95,7 @@ namespace JC
         {
             foreach (AssetData assetData in assetBundleData.assetDataMap.Values)
             {
-                if (!assetData.enabled)
+                if (!assetData.enabled || assetData.HasDependence())
                 {
                     continue;
                 }
@@ -115,9 +115,9 @@ namespace JC
                 return true;
             }
 
-            AssetData assetDataChild = null;
-            bool hasAssetDataChild = assetBundleData.TryGetDependenceChild(assetData.id, out assetDataChild);
-            if (hasAssetDataChild || assetData.HasDependence())
+            AssetData[] assetDataChildren = null;
+            bool hasAssetDataChildren = assetBundleData.TryGetDependenceChildren(assetData.id, out assetDataChildren);
+            if (hasAssetDataChildren || assetData.HasDependence())
             {
                 BuildPipeline.PushAssetDependencies();
             }
@@ -138,12 +138,15 @@ namespace JC
                 }
             }
 
-            if (hasAssetDataChild)
+            if (hasAssetDataChildren)
             {
-                BuildAsset(assetDataChild);
+                foreach (AssetData assetDataChild in assetDataChildren)
+                {
+                    BuildAsset(assetDataChild);
+                }
             }
 
-            if (hasAssetDataChild || assetData.HasDependence())
+            if (hasAssetDataChildren || assetData.HasDependence())
             {
                 BuildPipeline.PopAssetDependencies();
             }
@@ -606,18 +609,23 @@ namespace JC
 
             public Dictionary<string/*id of AssetData*/, AssetData> assetDataMap = null;
 
-            public bool TryGetDependenceChild(string assetId, out AssetData assetDataDependenceChild)
+            public bool TryGetDependenceChildren(string assetId, out AssetData[] assetDataDependenceChildren)
             {
+                List<AssetData> temp = null;
                 foreach (AssetData assetData in assetDataMap.Values)
                 {
                     if (assetData.id != assetId && assetData.HasDependence() && assetData.dependence == assetId)
                     {
-                        assetDataDependenceChild = assetData;
-                        return true;
+                        if (temp == null)
+                        {
+                            temp = new List<AssetData>();
+                        }
+                        temp.Add(assetData);
                     }
                 }
-                assetDataDependenceChild = null;
-                return false;
+                assetDataDependenceChildren = temp == null ? null : temp.ToArray();
+
+                return temp != null && temp.Count > 0;
             }
 
             public bool IsIgnoreExtension(string path)
