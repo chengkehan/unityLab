@@ -54,7 +54,7 @@ namespace JC
                 data.callback(response);
 
                 // All Complete
-                if (this.response.responseList[this.response.responseList.Length - 1] != null)
+                if (this.response.IsResponseListComplete())
                 {
                     data.callback(this.response);
                 }

@@ -54,6 +54,11 @@ namespace JC
         public object extraData = null;
 
         public LoaderResponse[] responseList = null;
+
+        public bool IsResponseListComplete()
+        {
+            return responseList == null ? false : responseList[responseList.Length - 1] != null;
+        }
     }
 
     public enum LoaderType
