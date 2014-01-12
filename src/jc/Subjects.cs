@@ -8,14 +8,14 @@ namespace JC
     {
         public delegate void Callback(MessageType msgType, object data);
 
-        public Dictionary<MessageType, LinkedList<Callback>> msgMap = null;
+        public Dictionary<MessageType, List<Callback>> msgMap = null;
 
-        private LinkedList<Callback> callbackListTemp = null;
+        private List<Callback> callbackListTemp = null;
 
         public Subjects()
         {
-            msgMap = new Dictionary<MessageType, LinkedList<Callback>>();
-            callbackListTemp = new LinkedList<Callback>();
+            msgMap = new Dictionary<MessageType, List<Callback>>();
+            callbackListTemp = new List<Callback>();
         }
 
         public bool Follow(MessageType msgType, Callback callback)
@@ -25,13 +25,13 @@ namespace JC
                 return false;
             }
 
-            LinkedList<Callback> callbackList = null;
+            List<Callback> callbackList = null;
             if (!msgMap.TryGetValue(msgType, out callbackList))
             {
-                callbackList = new LinkedList<Callback>();
+                callbackList = new List<Callback>();
                 msgMap.Add(msgType, callbackList);
             }
-            callbackList.AddLast(callback);
+            callbackList.Add(callback);
 
             return true;
         }
@@ -43,7 +43,7 @@ namespace JC
                 return false;
             }
 
-            LinkedList<Callback> callbackList = null;
+            List<Callback> callbackList = null;
             if (!msgMap.TryGetValue(msgType, out callbackList))
             {
                 return false;
@@ -55,7 +55,7 @@ namespace JC
 
         public void Notify(MessageType msgType, object data = null)
         {
-            LinkedList<Callback> callbackList = null;
+            List<Callback> callbackList = null;
             if (!msgMap.TryGetValue(msgType, out callbackList))
             {
                 return;
@@ -67,10 +67,7 @@ namespace JC
             }
 
             callbackListTemp.Clear();
-            foreach (Callback callback in callbackList)
-            {
-                callbackListTemp.AddLast(callback);
-            }
+            callbackListTemp.AddRange(callbackList);
 
             foreach (Callback callback in callbackListTemp)
             {

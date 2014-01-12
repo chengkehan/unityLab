@@ -8,7 +8,7 @@ namespace JC
     {
         private static bool coroutineWorking = false;
 
-        private static LinkedList<Loader> loaderList = new LinkedList<Loader>();
+        private static List<Loader> loaderList = new List<Loader>();
 
         private WWW www = null;
 
@@ -17,6 +17,12 @@ namespace JC
         private LoaderCallback callback = null;
 
         private object extraData = null;
+
+        public static bool LoadSQ(LoaderRequest request, LoaderCallback callback = null, object extraData = null)
+        {
+            Loader loader = new Loader();
+            return loader.Load(request, callback, extraData);
+        }
 
         public Loader()
         {
@@ -35,7 +41,7 @@ namespace JC
             this.request = request;
             this.callback = callback;
             this.extraData = extraData;
-            loaderList.AddLast(this);
+            loaderList.Add(this);
 
             www = new WWW(request.url);
 

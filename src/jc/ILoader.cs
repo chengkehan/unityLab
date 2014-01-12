@@ -18,10 +18,20 @@ namespace JC
 
         public LoaderType type;
 
+        public string[] urlList = null;
+
+        public LoaderType[] typeList = null;
+
         public LoaderRequest(string url, LoaderType type)
         {
             this.url = url;
             this.type = type;
+        }
+
+        public LoaderRequest(string[] urlList, LoaderType[] typeList)
+        {
+            this.urlList = urlList;
+            this.typeList = typeList;
         }
     }
 
@@ -42,6 +52,8 @@ namespace JC
         public string error = null;
 
         public object extraData = null;
+
+        public LoaderResponse[] responseList = null;
     }
 
     public enum LoaderType
