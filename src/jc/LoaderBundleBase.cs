@@ -56,6 +56,7 @@ namespace JC
                 // All Complete
                 if (this.response.IsResponseListComplete())
                 {
+                    this.response.isSuccessful = true;
                     data.callback(this.response);
                 }
             }

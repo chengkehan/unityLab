@@ -59,6 +59,18 @@ namespace JC
         {
             return responseList == null ? false : responseList[responseList.Length - 1] != null;
         }
+
+        public LoaderResponse GetTheLastLoaderResponse()
+        {
+            if (responseList == null)
+            {
+                return null;
+            }
+            else
+            {
+                return responseList[responseList.Length - 1];
+            }
+        }
     }
 
     public enum LoaderType
