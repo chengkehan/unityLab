@@ -3,11 +3,9 @@ using System.Collections;
 
 namespace JC
 {
-    public delegate void LoaderCallback(LoaderResponse response);
-
     public interface ILoader
     {
-        bool Load(LoaderRequest request, LoaderCallback callback = null, object extraData = null);
+        bool Load(LoaderRequest request, System.Action<LoaderResponse> callback = null, object extraData = null);
 
         void Stop();
     }
@@ -43,7 +41,7 @@ namespace JC
 
         public byte[] bytes = null;
 
-        public Texture2D texture = null;
+        public Texture2D texture2D = null;
 
         public AssetBundle assetBundle = null;
 

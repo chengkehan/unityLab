@@ -12,7 +12,7 @@ namespace JC
             loader = new LoaderQueueType();
         }
 
-        public bool Load(LoaderRequest request, LoaderCallback callback = null, object extraData = null)
+        public bool Load(LoaderRequest request, System.Action<LoaderResponse> callback = null, object extraData = null)
         {
             if (request == null || request.urlList == null || request.urlList.Length == 0)
             {
@@ -70,7 +70,7 @@ namespace JC
 
         private class ExtraData
         {
-            public LoaderCallback callback = null;
+            public System.Action<LoaderResponse> callback = null;
 
             public object extraData = null;
         }

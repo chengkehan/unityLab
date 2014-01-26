@@ -5,11 +5,19 @@ namespace JC
 {
     public class URL
     {
-        private static string m_file = "file:///";
+        private static string m_file = null;
         public static string file
         {
             get
             {
+                if (m_file == null)
+                {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                    m_file = "jar:file:///";
+#else
+                    m_file = "file:///";
+#endif
+                }
                 return m_file;
             }
         }
@@ -21,7 +29,11 @@ namespace JC
             {
                 if (s_streamingAssetsPath == null)
                 {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                    s_streamingAssetsPath = Application.dataPath + "!/assets";
+#else
                     s_streamingAssetsPath = Application.streamingAssetsPath.Replace('\\', '/');
+#endif
                 }
                 return s_streamingAssetsPath;
             }

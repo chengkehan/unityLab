@@ -10,14 +10,14 @@ namespace JC
 
         private Loader loader = null;
 
-        private LoaderCallback callback = null;
+        private System.Action<LoaderResponse> callback = null;
 
         public CacheLoader()
         {
             loader = new Loader();
         }
 
-        public bool Load(LoaderRequest request, LoaderCallback callback = null, object extraData = null)
+        public bool Load(LoaderRequest request, System.Action<LoaderResponse> callback = null, object extraData = null)
         {
             if (request == null || string.IsNullOrEmpty(request.url))
             {

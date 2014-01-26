@@ -14,11 +14,11 @@ namespace JC
 
         private LoaderRequest request = null;
 
-        private LoaderCallback callback = null;
+        private System.Action<LoaderResponse> callback = null;
 
         private object extraData = null;
 
-        public static bool LoadSQ(LoaderRequest request, LoaderCallback callback = null, object extraData = null)
+        public static bool LoadSQ(LoaderRequest request, System.Action<LoaderResponse> callback = null, object extraData = null)
         {
             Loader loader = new Loader();
             return loader.Load(request, callback, extraData);
@@ -29,7 +29,7 @@ namespace JC
 
         }
 
-        public bool Load(LoaderRequest request, LoaderCallback callback = null, object extraData = null)
+        public bool Load(LoaderRequest request, System.Action<LoaderResponse> callback = null, object extraData = null)
         {
             if (request == null || string.IsNullOrEmpty(request.url))
             {
@@ -98,7 +98,7 @@ namespace JC
                                     }
                                     else if (type == LoaderType.Texture)
                                     {
-                                        response.texture = loader.www.texture;
+                                        response.texture2D = loader.www.texture;
                                     }
                                     else if (type == LoaderType.AssetBundle)
                                     {
