@@ -5,22 +5,35 @@
 	
 	<asset id="ngui_atlas_font">
 		<bind savePath="ui/ngui.unity3d">
-			<item type="directory" recursion="true"><![CDATA[NGUI]]></item>
+			<item type="directory" recursion="true">
+				<path><![CDATA[NGUI]]></path>
+			</item>
 		</bind>
 		<bind savePath="ui/ui_atlas.unity3d">
-			<item type="file"><![CDATA[Atlas/UIAtlas.prefab]]></item>
-			<item type="file"><![CDATA[Atlas/UIAtlas.mat]]></item>
-			<item type="file"><![CDATA[Atlas/UIAtlas.png]]></item>
+			<item type="file">
+				<path><![CDATA[Atlas/UIAtlas.prefab]]></path>
+			</item>
+			<item type="file"><![CDATA[Atlas/UIAtlas.mat]]>
+			</item>
+			<item type="file">
+				<path><![CDATA[Atlas/UIAtlas.png]]></path>
+			</item>
 		</bind>
 		<bind savePath="ui/ui_font.unity3d">
-			<item type="file"><![CDATA[Font/msyh.prefab]]></item>
-			<item type="file"><![CDATA[Font/msyh.ttf]]></item>
+			<item type="file">
+				<path><![CDATA[Font/msyh.prefab]]></path>
+			</item>
+			<item type="file">
+				<path><![CDATA[Font/msyh.ttf]]></path>
+			</item>
 		</bind>
 	</asset>
 
 	<asset id="loading" dependence="ngui_atlas_font">
 		<bind savePath="ui/loading.unity3d">
-			<item type="file"><![CDATA[Loading/Prefab/Loading.prefab]]></item>
+			<item type="file">
+				<path><![CDATA[Loading/Prefab/Loading.prefab]]></path>
+			</item>
 		</bind>
 	</asset>
 	

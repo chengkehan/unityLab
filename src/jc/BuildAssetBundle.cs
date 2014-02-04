@@ -44,7 +44,17 @@ namespace JC
                 return;
             }
 
+            ClearGarbage();
+
             Debug.Log("BuildAssetBundle Complete");
+        }
+
+        private void ClearGarbage()
+        {
+            foreach (string path in assetBundleData.garbageAssetList)
+            {
+                AssetDatabase.DeleteAsset(path);
+            }
         }
 
         private bool BuildDo()

@@ -10,6 +10,34 @@ namespace JC
 {
     public class BuildAssetBundleData
     {
+        public static bool SetupLightmap(Object lightmapAssetObj)
+        {
+            if (!(lightmapAssetObj is LightMapAsset))
+            {
+                return false;
+            }
+
+
+            LightMapAsset lightmapAsset = (LightMapAsset)lightmapAssetObj;
+
+            if (lightmapAsset.lightmapFar == null || lightmapAsset.lightmapNear == null || lightmapAsset.lightmapFar.Length != lightmapAsset.lightmapNear.Length)
+            {
+                return false;
+            }
+
+            int count = lightmapAsset.lightmapFar.Length;
+            LightmapData[] lightmapDatas = new LightmapData[count];
+            for (int i = 0; i < count; ++i)
+            {
+                LightmapData Lightmap = new LightmapData();
+                Lightmap.lightmapFar = lightmapAsset.lightmapFar[i];
+                Lightmap.lightmapNear = lightmapAsset.lightmapNear[i];
+                lightmapDatas[i] = Lightmap;
+            }
+            LightmapSettings.lightmaps = lightmapDatas;
+            return true;
+        }
+
         public class AssetBundleData
         {
             public List<string> ignoreExtentionList = null;
@@ -18,6 +46,8 @@ namespace JC
 
 #if UNITY_EDITOR
             public BuildTarget platform = BuildTarget.WebPlayer;
+
+            public List<string> garbageAssetList = new List<string>();
 #endif
 
             public Dictionary<string/*id of AssetData*/, AssetData> assetDataMap = null;
@@ -227,7 +257,14 @@ namespace JC
                 XmlNode recursionNode = itemNode.Attributes.GetNamedItem("recursion");
                 itemData.recursive = recursionNode == null ? false : (recursionNode.Value.ToLower() == "true");
 
-                string path = itemNode.InnerText.Replace('\\', '/');
+                // path
+                XmlNode pathNode = itemNode.SelectSingleNode("path");
+                if (pathNode == null)
+                {
+                    Debug.LogError("未指定path" + ":" + assetDataId);
+                    return false;
+                }
+                string path = pathNode.InnerText.Replace('\\', '/');
                 if (string.IsNullOrEmpty(path))
                 {
                     Debug.LogError("无法获取资源的位置（item节点中的内容）" + ":" + assetDataId);
@@ -237,6 +274,25 @@ namespace JC
 
                 // isScene
                 itemData.isScene = path.EndsWith(".unity");
+
+                // lightmap
+                XmlNode lightmapNode = itemNode.SelectSingleNode("lightmap");
+                if (lightmapNode != null)
+                {
+                    if (itemData.type != ItemType.File)
+                    {
+                        Debug.LogError("只有文件类型的资源才能指定lightmap节点:" + itemData.path);
+                        return false;
+                    }
+
+                    string lightmapScene = lightmapNode.InnerText;
+                    if (!lightmapScene.EndsWith(".unity"))
+                    {
+                        Debug.LogError("lightmap指定的资源只能是场景文件:" + lightmapScene);
+                        return false;
+                    }
+                    itemData.lightmapScene = lightmapScene;
+                }
 
                 return true;
             }
@@ -380,6 +436,8 @@ namespace JC
 
             public bool isScene = false;
 
+            public string lightmapScene = null;
+
             public bool recursive = false;
 
             public string path = null;
@@ -395,7 +453,7 @@ namespace JC
                 {
                     if (type == ItemType.File)
                     {
-                        return GetBuildFileParams(assetBundleData, path, assetObjectList, assetObjectNameList, savePathList);
+                        return GetBuildFileParams(assetBundleData, path, assetObjectList, assetObjectNameList, savePathList, lightmapScene);
                     }
                     else if (type == ItemType.Directory)
                     {
@@ -423,7 +481,7 @@ namespace JC
                     foreach (string fileFullPath in fileFullPathList)
                     {
                         string filePath = fileFullPath.Replace('\\', '/').Substring(URL.dataPath.Length + 1);
-                        if (!GetBuildFileParams(assetBundleData, filePath, assetObjectList, assetObjectNameList, savePathList))
+                        if (!GetBuildFileParams(assetBundleData, filePath, assetObjectList, assetObjectNameList, savePathList, null))
                         {
                             return false;
                         }
@@ -450,7 +508,7 @@ namespace JC
                 return true;
             }
 
-            private bool GetBuildFileParams(AssetBundleData assetBundleData, string filePath, List<Object> assetObjectList, List<string> assetObjectNameList, List<string> savePathList)
+            private bool GetBuildFileParams(AssetBundleData assetBundleData, string filePath, List<Object> assetObjectList, List<string> assetObjectNameList, List<string> savePathList, string lightmapScene)
             {
                 if (assetBundleData.IsIgnoreExtension(filePath))
                 {
@@ -463,9 +521,16 @@ namespace JC
                     Debug.LogError("读取资源文件失败" + ":" + filePath);
                     return false;
                 }
+
                 assetObjectList.Add(assetObject);
                 assetObjectNameList.Add(filePath);
                 savePathList.Add(filePath + ".unity3d");
+
+                if (!GetBuildLightmapParams(assetBundleData, filePath, assetObjectList, assetObjectNameList, savePathList, lightmapScene))
+                {
+                    return false;
+                }
+
                 return true;
             }
 
@@ -479,6 +544,54 @@ namespace JC
                 assetObjectList.Add(null);
                 assetObjectNameList.Add(filePath);
                 savePathList.Add(filePath + ".unity3d");
+                return true;
+            }
+
+            private bool GetBuildLightmapParams(AssetBundleData assetBundleData, string filePath, List<Object> assetObjectList, List<string> assetObjectNameList, List<string> savePathList, string lightmapScene)
+            {
+                if (string.IsNullOrEmpty(lightmapScene))
+                {
+                    return true;
+                }
+
+                string currentScene = EditorApplication.currentScene;
+                if (!AssetDatabase.OpenAsset(AssetDatabase.LoadMainAssetAtPath(URL.assets + "/" + lightmapScene)))
+                {
+                    Debug.LogError("无法打开场景:" + filePath);
+                    return false;
+                }
+
+                if (LightmapSettings.lightmaps == null || LightmapSettings.lightmaps.Length == 0)
+                {
+                    Debug.LogWarning("场景没有lightmap参数:" + filePath);
+                    return true;
+                }
+
+                LightMapAsset lightmapAsset = ScriptableObject.CreateInstance<LightMapAsset>();
+                int count = LightmapSettings.lightmaps.Length;
+                lightmapAsset.lightmapFar = new Texture2D[count];
+                lightmapAsset.lightmapNear = new Texture2D[count];
+                for (int i = 0; i < count; ++i)
+                {
+                    lightmapAsset.lightmapFar[i] = LightmapSettings.lightmaps[i].lightmapFar;
+                    lightmapAsset.lightmapNear[i] = LightmapSettings.lightmaps[i].lightmapNear;
+                }
+                string assetPath = URL.assets + "/" + filePath + ".lightmap.asset";
+                assetBundleData.garbageAssetList.Add(assetPath);
+                AssetDatabase.CreateAsset(lightmapAsset, assetPath);
+                assetObjectList.Add(AssetDatabase.LoadAssetAtPath(assetPath, typeof(LightMapAsset)));
+                assetObjectNameList.Add(filePath + ".lightmap");
+                savePathList.Add(filePath + ".lightmap.unity3d");
+
+                if (string.IsNullOrEmpty(currentScene))
+                {
+                    EditorApplication.NewScene();
+                }
+                else
+                {
+                    AssetDatabase.OpenAsset(AssetDatabase.LoadMainAssetAtPath(currentScene));
+                }
+
                 return true;
             }
 #endif

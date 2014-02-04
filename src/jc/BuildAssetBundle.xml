@@ -14,26 +14,38 @@
 		<!-- 不放在bind节点内的item，其中每一个物理文件都将以原有的目录结构在输出目录生成对应的一个打包文件 -->
 		<!-- savePath:保存路径（非绝对路径，Assets的相对路径） -->
 		<bind savePath="test/JC.unity3d">
-			<item type="directory" recursion="true"><![CDATA[JC]]></item>
+			<item type="directory" recursion="true">
+				<path><![CDATA[JC]]></path>
+			</item>
 		</bind>
 		<!-- 一个资源配置 -->
 		<!-- type:资源的类型。directory（目录），file（文件） -->
 		<!-- recursion:是否需要递归目录 -->
 		<!-- item节点中的文本:表示目录的路径或文件的路径（非绝对路径，Assets的相对路径） -->
-		<item type="directory" recursion="false"><![CDATA[JC]]></item>
+		<item type="directory" recursion="false">
+			<path><![CDATA[JC]]></path>
+		</item>
 	</asset>
 	<asset id="1" dependence="0">
 		<!-- bind:可以将一个或多个item放在bind节点内，表示这个bind节点中的所有item将打包成一个资源文件 -->
 		<!-- 不放在bind节点内的item，其中每一个物理文件都将以原有的目录结构在输出目录生成对应的一个打包文件 -->
 		<!-- savePath:保存路径（非绝对路径，Assets的相对路径） -->
 		<bind savePath="test/JC2.unity3d">
-			<item type="directory" recursion="true"><![CDATA[JC]]></item>
+			<item type="directory" recursion="true">
+				<path><![CDATA[JC]]></path>
+			</item>
 		</bind>
 		<!-- 打包场景 -->
-		<item type="file"><![CDATA[Scene/100000.unity]]></item>
+		<item type="file">
+			<path><![CDATA[Scene/100000.unity]]></path>
+		</item>
 		<bind savePath="Scene/allScenes.unity3d">
-			<item type="file"><![CDATA[Scene/100001.unity]]></item>
-			<item type="file"><![CDATA[Scene/100002.unity]]></item>
+			<item type="file">
+				<path><![CDATA[Scene/100001.unity]]></path>
+			</item>
+			<item type="file">
+				<path><![CDATA[Scene/100002.unity]]></path>
+			</item>
 		</bind>
 	</asset>
 </buildAssetBundle>
