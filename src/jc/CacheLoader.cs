@@ -12,6 +12,16 @@ namespace JC
 
         private System.Action<LoaderResponse> callback = null;
 
+        public static void DestroyCache()
+        {
+            foreach (LoaderResponse response in cacheMap.Values)
+            {
+                DestroyCacheResponse(response);
+            }
+            cacheMap.Clear();
+            Resources.UnloadUnusedAssets();
+        }
+
         public CacheLoader()
         {
             loader = new Loader();
@@ -55,6 +65,23 @@ namespace JC
         public void Stop()
         {
             loader.Stop();
+        }
+
+        private static void DestroyCacheResponse(LoaderResponse response)
+        {
+            response.texture2D = null;
+            if (response.assetBundle != null)
+            {
+                response.assetBundle.Unload(false);
+            }
+            if (response.responseList != null)
+            {
+                foreach (LoaderResponse subResponse in response.responseList)
+                {
+                    DestroyCacheResponse(subResponse);
+                }
+                response.responseList = null;
+            }
         }
 
         private void LoaderCallback(LoaderResponse response)

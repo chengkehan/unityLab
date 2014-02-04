@@ -5,6 +5,19 @@ namespace JC
 {
     public class URL
     {
+        private static string m_filePrefix = null;
+        public static string filePrefix
+        {
+            get
+            {
+                if (m_filePrefix == null)
+                {
+                    m_filePrefix = "file:///";
+                }
+                return m_filePrefix;
+            }
+        }
+
         private static string m_file = null;
         public static string file
         {

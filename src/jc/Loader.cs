@@ -18,6 +18,11 @@ namespace JC
 
         private object extraData = null;
 
+        public static void DestroyCache()
+        {
+            CacheLoader.DestroyCache();
+        }
+
         public static bool LoadSQ(LoaderRequest request, System.Action<LoaderResponse> callback = null, object extraData = null)
         {
             Loader loader = new Loader();
