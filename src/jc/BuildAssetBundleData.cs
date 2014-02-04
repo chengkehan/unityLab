@@ -235,6 +235,15 @@ namespace JC
                 }
                 itemData.path = path;
 
+                // isScene
+                XmlNode isSceneNode = itemNode.Attributes.GetNamedItem("isScene");
+                itemData.isScene = isSceneNode == null ? false : (isSceneNode.Value == "true");
+                if (itemData.type == ItemType.Directory && itemData.isScene)
+                {
+                    Debug.LogError("isScene属性不能赋予directory类型的节点");
+                    return false;
+                }
+
                 return true;
             }
 
@@ -375,6 +384,8 @@ namespace JC
         {
             public ItemType type;
 
+            public bool isScene = false;
+
             public bool recursive = false;
 
             public string path = null;
@@ -382,18 +393,25 @@ namespace JC
 #if UNITY_EDITOR
             public bool GetBuildParams(AssetBundleData assetBundleData, List<Object> assetObjectList, List<string> assetObjectNameList, List<string> savePathList)
             {
-                if (type == ItemType.File)
+                if (isScene)
                 {
-                    return GetBuildFileParams(assetBundleData, path, assetObjectList, assetObjectNameList, savePathList);
-                }
-                else if (type == ItemType.Directory)
-                {
-                    return GetBuildDirectoryParams(assetBundleData, path, assetObjectList, assetObjectNameList, savePathList);
+                    return GetBuildSceneParams(assetBundleData, path, assetObjectList, assetObjectNameList, savePathList);
                 }
                 else
                 {
-                    Debug.LogError("发生未知的错误" + ":" + type);
-                    return false;
+                    if (type == ItemType.File)
+                    {
+                        return GetBuildFileParams(assetBundleData, path, assetObjectList, assetObjectNameList, savePathList);
+                    }
+                    else if (type == ItemType.Directory)
+                    {
+                        return GetBuildDirectoryParams(assetBundleData, path, assetObjectList, assetObjectNameList, savePathList);
+                    }
+                    else
+                    {
+                        Debug.LogError("发生未知的错误" + ":" + type);
+                        return false;
+                    }
                 }
             }
 
@@ -452,9 +470,20 @@ namespace JC
                     return false;
                 }
                 assetObjectList.Add(assetObject);
-
                 assetObjectNameList.Add(filePath);
+                savePathList.Add(filePath + ".unity3d");
+                return true;
+            }
 
+            private bool GetBuildSceneParams(AssetBundleData assetBundleData, string filePath, List<Object> assetObjectList, List<string> assetObjectNameList, List<string> savePathList)
+            {
+                if (assetBundleData.IsIgnoreExtension(filePath))
+                {
+                    return true;
+                }
+
+                assetObjectList.Add(null);
+                assetObjectNameList.Add(filePath);
                 savePathList.Add(filePath + ".unity3d");
                 return true;
             }

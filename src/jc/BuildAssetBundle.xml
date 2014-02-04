@@ -29,5 +29,11 @@
 		<bind savePath="test/JC2.unity3d">
 			<item type="directory" recursion="true"><![CDATA[JC]]></item>
 		</bind>
+		<!-- 打包场景 -->
+		<item type="file" isScene="true"><![CDATA[Scene/100000.unity]]></item>
+		<bind savePath="Scene/allScenes.unity3d">
+			<item type="file" isScene="true"><![CDATA[Scene/100001.unity]]></item>
+			<item type="file" isScene="true"><![CDATA[Scene/100002.unity]]></item>
+		</bind>
 	</asset>
 </buildAssetBundle>

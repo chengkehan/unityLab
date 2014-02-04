@@ -148,9 +148,25 @@ namespace JC
                     }
                 }
 
-                if (!BuildPipeline.BuildAssetBundleExplicitAssetNames(assetObjectList.ToArray(), assetObjectNameList.ToArray(), URL.assets + "/" + assetBundleData.saveRoot  + "/" + itemDataCollection.savePath, BuildAssetBundleOptions.CollectDependencies | BuildAssetBundleOptions.CompleteAssets, assetBundleData.platform))
+                // isScene
+                if (assetObjectList[0] == null)
                 {
-                    return false;
+                    int numAssets = assetObjectList.Count;
+                    for (int i = 0; i < numAssets; ++i)
+                    {
+                        assetObjectNameList[i] = URL.assets + "/" + assetObjectNameList[i];
+                    }
+                    if(!string.IsNullOrEmpty(BuildPipeline.BuildPlayer(assetObjectNameList.ToArray(), URL.assets + "/" + assetBundleData.saveRoot + "/" + itemDataCollection.savePath, assetBundleData.platform, BuildOptions.BuildAdditionalStreamedScenes)))
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    if (!BuildPipeline.BuildAssetBundleExplicitAssetNames(assetObjectList.ToArray(), assetObjectNameList.ToArray(), URL.assets + "/" + assetBundleData.saveRoot + "/" + itemDataCollection.savePath, BuildAssetBundleOptions.CollectDependencies | BuildAssetBundleOptions.CompleteAssets, assetBundleData.platform))
+                    {
+                        return false;
+                    }
                 }
             }
             else
@@ -180,15 +196,31 @@ namespace JC
                 }
 
                 int length = assetObjectList.Count;
-                Object[] tempObjList = new Object[1];
-                string[] tempNameList = new string[1];
-                for (int i = 0; i < length; ++i)
+                // isScene
+                if (assetObjectList[0] == null)
                 {
-                    tempObjList[0] = assetObjectList[i];
-                    tempNameList[0] = assetObjectNameList[i];
-                    if (!BuildPipeline.BuildAssetBundleExplicitAssetNames(tempObjList, tempNameList, URL.assets + "/" + assetBundleData.saveRoot + "/" + savePathList[i], BuildAssetBundleOptions.CollectDependencies | BuildAssetBundleOptions.CompleteAssets, assetBundleData.platform))
+                    string[] sceneNameList = new string[1];
+                    for (int i = 0; i < length; ++i)
                     {
-                        return false;
+                        sceneNameList[0] = URL.assets + "/" + assetObjectNameList[i];
+                        if (!string.IsNullOrEmpty(BuildPipeline.BuildPlayer(sceneNameList, URL.assets + "/" + assetBundleData.saveRoot + "/" + savePathList[i], assetBundleData.platform, BuildOptions.BuildAdditionalStreamedScenes)))
+                        {
+                            return false;
+                        }
+                    }
+                }
+                else
+                {
+                    Object[] tempObjList = new Object[1];
+                    string[] tempNameList = new string[1];
+                    for (int i = 0; i < length; ++i)
+                    {
+                        tempObjList[0] = assetObjectList[i];
+                        tempNameList[0] = assetObjectNameList[i];
+                        if (!BuildPipeline.BuildAssetBundleExplicitAssetNames(tempObjList, tempNameList, URL.assets + "/" + assetBundleData.saveRoot + "/" + savePathList[i], BuildAssetBundleOptions.CollectDependencies | BuildAssetBundleOptions.CompleteAssets, assetBundleData.platform))
+                        {
+                            return false;
+                        }
                     }
                 }
             }
@@ -259,6 +291,26 @@ namespace JC
                             Debug.LogError("发生未知的错误" + ":" + itemData.type);
                             return false;
                         }
+                    }
+
+                    // isScene
+                    int sceneCount = 0;
+                    int resCount = 0;
+                    foreach (BuildAssetBundleData.ItemData itemData in itemDataCollection.itemDataList)
+                    {
+                        if (itemData.isScene)
+                        {
+                            ++sceneCount;
+                        }
+                        else
+                        {
+                            ++resCount;
+                        }
+                    }
+                    if (sceneCount > 0 && resCount != 0)
+                    {
+                        Debug.LogError("场景资源不能和普通资源合并");
+                        return false;
                     }
                 }
             }

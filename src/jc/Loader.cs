@@ -10,6 +10,8 @@ namespace JC
 
         private static List<Loader> loaderList = new List<Loader>();
 
+        private static List<AssetBundle> garbageList = new List<AssetBundle>();
+
         private WWW www = null;
 
         private LoaderRequest request = null;
@@ -21,6 +23,16 @@ namespace JC
         public static void DestroyCache()
         {
             CacheLoader.DestroyCache();
+        }
+
+        public static void DestroyGarbage()
+        {
+            foreach (AssetBundle item in garbageList)
+            {
+                item.Unload(false);
+            }
+            garbageList.Clear();
+            Resources.UnloadUnusedAssets();
         }
 
         public static bool LoadSQ(LoaderRequest request, System.Action<LoaderResponse> callback = null, object extraData = null)
@@ -108,6 +120,7 @@ namespace JC
                                     else if (type == LoaderType.AssetBundle)
                                     {
                                         response.assetBundle = loader.www.assetBundle;
+                                        garbageList.Add(response.assetBundle);
                                     }
                                     else
                                     {
