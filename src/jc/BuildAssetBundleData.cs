@@ -236,13 +236,7 @@ namespace JC
                 itemData.path = path;
 
                 // isScene
-                XmlNode isSceneNode = itemNode.Attributes.GetNamedItem("isScene");
-                itemData.isScene = isSceneNode == null ? false : (isSceneNode.Value == "true");
-                if (itemData.type == ItemType.Directory && itemData.isScene)
-                {
-                    Debug.LogError("isScene属性不能赋予directory类型的节点");
-                    return false;
-                }
+                itemData.isScene = path.EndsWith(".unity");
 
                 return true;
             }
