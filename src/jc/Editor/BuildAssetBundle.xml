@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<buildAssetBundle ignoreExtention="svn;meta" platform="StandaloneWindows">
+	
+	<saveRoot><![CDATA[Resource]]></saveRoot>
+	
+	<asset id="ngui_atlas_font">
+		<bind savePath="UI/ngui.unity3d">
+			<item type="directory" recursion="true">
+				<path><![CDATA[NGUI]]></path>
+			</item>
+		</bind>
+		<bind savePath="UI/ui_atlas.unity3d">
+			<item type="file">
+				<path><![CDATA[Atlas/UIAtlas.prefab]]></path>
+			</item>
+			<item type="file">
+				<path><![CDATA[Atlas/UIAtlas.mat]]></path>
+			</item>
+			<item type="file">
+				<path><![CDATA[Atlas/UIAtlas.png]]></path>
+			</item>
+		</bind>
+		<bind savePath="UI/ui_font.unity3d">
+			<item type="file">
+				<path><![CDATA[Font/msyh.prefab]]></path>
+			</item>
+			<item type="file">
+				<path><![CDATA[Font/msyh.ttf]]></path>
+			</item>
+		</bind>
+	</asset>
+
+	<asset id="screenDialog" dependence="ngui_atlas_font">
+		<bind savePath="UI/screenDialog.unity3d">
+			<item type="file">
+				<path><![CDATA[UI/ScreenDialog/Prefab/ScreenDialog.prefab]]></path>
+			</item>
+		</bind>
+	</asset>
+
+	<asset id="loading" dependence="ngui_atlas_font">
+		<bind savePath="UI/loading.unity3d">
+			<item type="file">
+				<path><![CDATA[UI/Loading/Prefab/Loading.prefab]]></path>
+			</item>
+		</bind>
+	</asset>
+	
+	<asset id="memorySlot" dependence="ngui_atlas_font">
+		<bind savePath="UI/memorySlot.unity3d">
+			<item type="file">
+				<path><![CDATA[UI/MemorySlot/Prefab/MemorySlot.prefab]]></path>
+			</item>
+		</bind>
+	</asset>
+	
+	<asset id="roleChoose" dependence="ngui_atlas_font">
+		<bind savePath="UI/roleChoose.unity3d">
+			<item type="file">
+				<path><![CDATA[UI/RoleChoose/Prefab/RoleChoose.prefab]]></path>
+			</item>
+		</bind>
+	</asset>
+	
+	<asset id="alert" dependence="ngui_atlas_font">
+		<bind savePath="UI/alert.unity3d">
+			<item type="file">
+				<path><![CDATA[UI/Alert/Prefab/Alert.prefab]]></path>
+			</item>
+		</bind>
+	</asset>
+	
+	<asset id="prelude" dependence="ngui_atlas_font">
+		<bind savePath="UI/prelude.unity3d">
+			<item type="file">
+				<path><![CDATA[UI/Prelude/Prefab/Prelude.prefab]]></path>
+			</item>
+		</bind>
+	</asset>
+
+</buildAssetBundle>
