@@ -3,7 +3,7 @@
 public class FSMMachine
 {
     private FSMState currentFSMState = null;
-    private StateID defaultStateId;
+	private StateID defaultStateId = StateID.NONE;
 	private List<FSMState> allFSMStates = null;
 
 	public FSMMachine()
@@ -19,11 +19,6 @@ public class FSMMachine
     public FSMState GetCurrentFSMState()
     {
         return this.currentFSMState;
-    }
-
-    public StateID GetCurrentStateID()
-    {
-		return this.currentFSMState == null ? StateID.NONE : this.currentFSMState.GetStateId();
     }
 
 	public bool GotoFSMState(StateID stateId)
@@ -61,7 +56,7 @@ public class FSMMachine
 		this.defaultStateId = stateId;
     }
 
-    public void UpdateMachine(float fDelta)
+    public void UpdateFSMMachine(float fDelta)
     {
         if (this.allFSMStates.Count != 0)
         {
