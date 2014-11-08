@@ -6,10 +6,10 @@ public class CameraLayerCullDistances : MonoBehaviour
 {
 	public static List<CameraLayerCullDistances> cameraLayerCullDistancesList = null;
 
-	[SerializedField]
+	[SerializeField]
 	public float cullDistance = 0.0f;
 
-	[SerializedField]
+	[SerializeField]
 	public LayerMask layer;
 
 #if UNITY_EDITOR

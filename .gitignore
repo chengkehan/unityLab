@@ -8,3 +8,13 @@
 *.sln
 
 FiniteStateMachine/AssemblyInfo.cs
+
+FiniteStateMachine/FiniteStateMachine.userprefs
+
+*.userprefs
+
+Tool/Library
+
+Tool/Temp
+
+Tool/ProjectSettings
