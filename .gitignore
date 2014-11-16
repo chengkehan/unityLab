@@ -19,4 +19,13 @@ Tool/Temp
 
 Tool/ProjectSettings
 
-BehaviourTree
+BehaviourTree/Assets
+
+BehaviourTree/bin
+
+BehaviourTree/Library
+
+BehaviourTree/ProjectSettings
+BehaviourTree/Behavior Designer.unitypackage
+
+BehaviourTree/AssemblyInfo.cs
