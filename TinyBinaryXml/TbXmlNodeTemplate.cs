@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace TinyBinaryXml
 {
-	public class TinyBinaryXmlNodeTemplate
+	public class TbXmlNodeTemplate
 	{
 		public static ushort idInc = 0;
 		
@@ -14,7 +14,7 @@ namespace TinyBinaryXml
 
 		public Dictionary<string, int> attributeNameIndexMapping = null;
 		
-		public List<TINY_BINARY_XML_ATTRIBUTE_TYPE> attributeTypes = null;
+		public List<TB_XML_ATTRIBUTE_TYPE> attributeTypes = null;
 	}
 }
 

@@ -17,7 +17,7 @@ namespace TinyBinaryXml
 
 			{
 				SerializeBuff();
-//				DeserializeBuff();
+				DeserializeBuff();
 			}
 
 			{
@@ -28,7 +28,7 @@ namespace TinyBinaryXml
 
 		private static void SerializeInnerText()
 		{
-			TinyBinaryXmlSerializer convertor = new TinyBinaryXmlSerializer();
+			TbXmlSerializer convertor = new TbXmlSerializer();
 			byte[] bytes = convertor.SerializeXmlString(File.ReadAllText("/Users/jimCheng/projects/XmlPerformanceTest/Assets/Resources/InnerText.xml"));
 			File.WriteAllBytes("/Users/jimCheng/Desktop/BinaryXml.bytes", bytes);
 		}
@@ -36,11 +36,9 @@ namespace TinyBinaryXml
 		private static void DeserializeInnerText()
 		{
 			DateTime time = DateTime.Now;
-			
-			TinyBinaryXmlDeserializer deserializer = new TinyBinaryXmlDeserializer();
-			byte[] bytes = File.ReadAllBytes("/Users/jimCheng/Desktop/BinaryXml.bytes");
-			TinyBinaryXml tinyBinaryXml = deserializer.DeserializeXmlBytes(bytes);
-			List<TinyBinaryXmlNodeInstance> nodes = tinyBinaryXml.docNodeInstance.GetNodes("root/item");
+
+			TbXml tbXml = TbXml.Load(File.ReadAllBytes("/Users/jimCheng/Desktop/BinaryXml.bytes"));
+			List<TbXmlNode> nodes = tbXml.docNode.GetNodes("root/item");
 			
 			Console.WriteLine(DateTime.Now - time);
 
@@ -53,7 +51,7 @@ namespace TinyBinaryXml
 
 		private static void SerializeBuff()
 		{
-			TinyBinaryXmlSerializer convertor = new TinyBinaryXmlSerializer();
+			TbXmlSerializer convertor = new TbXmlSerializer();
 			byte[] bytes = convertor.SerializeXmlString(File.ReadAllText("/Users/jimCheng/projects/XmlPerformanceTest/Assets/Resources/Buff.xml"));
 			File.WriteAllBytes("/Users/jimCheng/Desktop/BinaryXml.bytes", bytes);
 		}
@@ -61,11 +59,9 @@ namespace TinyBinaryXml
 		private static void DeserializeBuff()
 		{
 			DateTime time = DateTime.Now;
-			
-			TinyBinaryXmlDeserializer deserializer = new TinyBinaryXmlDeserializer();
-			byte[] bytes = File.ReadAllBytes("/Users/jimCheng/Desktop/BinaryXml.bytes");
-			TinyBinaryXml tinyBinaryXml = deserializer.DeserializeXmlBytes(bytes);
-			List<TinyBinaryXmlNodeInstance> nodes = tinyBinaryXml.docNodeInstance.GetNodes("Buff/Property");
+
+			TbXml tbXml = TbXml.Load(File.ReadAllBytes("/Users/jimCheng/Desktop/BinaryXml.bytes"));
+			List<TbXmlNode> nodes = tbXml.docNode.GetNodes("Buff/Property");
 			
 			Console.WriteLine(DateTime.Now - time);
 			

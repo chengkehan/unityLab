@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace TinyBinaryXml
 {
-	public class TinyBinaryXmlNodeInstance
+	public class TbXmlNode
 	{
 		public static ushort idInc = 0;
 		
@@ -14,7 +14,7 @@ namespace TinyBinaryXml
 		
 		public List<object> attributeValues = null;
 
-		public TinyBinaryXml tinyBinaryXml = null;
+		public TbXml tbXml = null;
 
 		public string text = null;
 
@@ -55,7 +55,7 @@ namespace TinyBinaryXml
 
 		private object GetValue(ref string name)
 		{
-			TinyBinaryXmlNodeTemplate nodeTemplate = tinyBinaryXml.nodeTemplates[templateId];
+			TbXmlNodeTemplate nodeTemplate = tbXml.nodeTemplates[templateId];
 			int attributeIndex;
 			if(nodeTemplate.attributeNameIndexMapping.TryGetValue(name, out attributeIndex))
 			{
@@ -67,44 +67,44 @@ namespace TinyBinaryXml
 			}
 		}
 
-		public List<TinyBinaryXmlNodeInstance> GetNodes(string path)
+		public List<TbXmlNode> GetNodes(string path)
 		{
 			if(string.IsNullOrEmpty(path))
 			{
 				return null;
 			}
 
-			List<TinyBinaryXmlNodeInstance> resultNodes = null;
+			List<TbXmlNode> resultNodes = null;
 			int numChildren = childrenIds == null ? 0 : childrenIds.Count;
 			string[] pathBlocks = path.Split('/');
 			for(int childIndex = 0; childIndex < numChildren; ++childIndex)
 			{
-				TinyBinaryXmlNodeInstance childNodeInstance = tinyBinaryXml.nodeInstances[childrenIds[childIndex]];
-				GetNodesRecursive(pathBlocks, 0, ref pathBlocks[0], childNodeInstance, ref resultNodes);
+				TbXmlNode childNode = tbXml.nodes[childrenIds[childIndex]];
+				GetNodesRecursive(pathBlocks, 0, ref pathBlocks[0], childNode, ref resultNodes);
 			}
 			
 			return resultNodes;
 		}
 
-		private void GetNodesRecursive(string[] pathBlocks, int pathBlockIndex, ref string pathBlock, TinyBinaryXmlNodeInstance currentNodeInstance, ref List<TinyBinaryXmlNodeInstance> resultNodes)
+		private void GetNodesRecursive(string[] pathBlocks, int pathBlockIndex, ref string pathBlock, TbXmlNode currentNode, ref List<TbXmlNode> resultNodes)
 		{
-			if(tinyBinaryXml.nodeTemplates[currentNodeInstance.templateId].name.Equals(pathBlock))
+			if(tbXml.nodeTemplates[currentNode.templateId].name.Equals(pathBlock))
 			{
 				if(pathBlockIndex == pathBlocks.Length - 1)
 				{
 					if(resultNodes == null)
 					{
-						resultNodes = new List<TinyBinaryXmlNodeInstance>();
+						resultNodes = new List<TbXmlNode>();
 					}
-					resultNodes.Add(currentNodeInstance);
+					resultNodes.Add(currentNode);
 				}
 				else
 				{
-					List<ushort> childrenIds = currentNodeInstance.childrenIds;
+					List<ushort> childrenIds = currentNode.childrenIds;
 					int numChildren = childrenIds == null ? 0 : childrenIds.Count;
 					for(int childIndex = 0; childIndex < numChildren; ++childIndex)
 					{
-						GetNodesRecursive(pathBlocks, pathBlockIndex + 1, ref pathBlocks[pathBlockIndex + 1], tinyBinaryXml.nodeInstances[childrenIds[childIndex]], ref resultNodes);
+						GetNodesRecursive(pathBlocks, pathBlockIndex + 1, ref pathBlocks[pathBlockIndex + 1], tbXml.nodes[childrenIds[childIndex]], ref resultNodes);
 					}
 				}
 			}

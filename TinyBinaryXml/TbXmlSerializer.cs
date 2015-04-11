@@ -7,11 +7,11 @@ using System.Text;
 
 namespace TinyBinaryXml
 {
-	public class TinyBinaryXmlSerializer
+	public class TbXmlSerializer
 	{
-		private List<TinyBinaryXmlNodeTemplate> nodeTemplates = new List<TinyBinaryXmlNodeTemplate>();
+		private List<TbXmlNodeTemplate> nodeTemplates = new List<TbXmlNodeTemplate>();
 
-		private List<TinyBinaryXmlNodeInstance> nodeInstances = new List<TinyBinaryXmlNodeInstance>();
+		private List<TbXmlNode> nodes = new List<TbXmlNode>();
 
 		public byte[] SerializeXmlString(string xmlString)
 		{
@@ -23,15 +23,15 @@ namespace TinyBinaryXml
 			XmlDocument doc = new XmlDocument();
 			doc.LoadXml(xmlString);
 
-			TinyBinaryXmlNodeInstance docNodeInstance = new TinyBinaryXmlNodeInstance();
-			docNodeInstance.childrenIds = new List<ushort>();
+			TbXmlNode docNode = new TbXmlNode();
+			docNode.childrenIds = new List<ushort>();
 
 			XmlNodeList xmlNodeList = doc.ChildNodes;
 			foreach(XmlNode xmlNode in xmlNodeList)
 			{
 				if(xmlNode.NodeType == XmlNodeType.Element)
 				{
-					ProcessXmlNode(docNodeInstance, xmlNode);
+					ProcessXmlNode(docNode, xmlNode);
 				}
 			}
 
@@ -47,16 +47,16 @@ namespace TinyBinaryXml
 			return buffer;
 		}
 
-		private void ProcessXmlNode(TinyBinaryXmlNodeInstance parentTinyBinaryXmlNodeInstance, XmlNode xmlNode)
+		private void ProcessXmlNode(TbXmlNode parentNode, XmlNode xmlNode)
 		{
-			TinyBinaryXmlNodeTemplate nodeTemplate = GetNodeTemplate(xmlNode);
+			TbXmlNodeTemplate nodeTemplate = GetNodeTemplate(xmlNode);
 			if(nodeTemplate == null)
 			{
-				nodeTemplate = new TinyBinaryXmlNodeTemplate();
+				nodeTemplate = new TbXmlNodeTemplate();
 				nodeTemplates.Add(nodeTemplate);
 				nodeTemplate.attributeNames = new List<string>();
-				nodeTemplate.attributeTypes = new List<TINY_BINARY_XML_ATTRIBUTE_TYPE>();
-				nodeTemplate.id = TinyBinaryXmlNodeTemplate.idInc++;
+				nodeTemplate.attributeTypes = new List<TB_XML_ATTRIBUTE_TYPE>();
+				nodeTemplate.id = TbXmlNodeTemplate.idInc++;
 				nodeTemplate.name = xmlNode.Name;
 				foreach(XmlAttribute xmlAttribute in xmlNode.Attributes)
 				{
@@ -64,34 +64,34 @@ namespace TinyBinaryXml
 					float attributeFloat;
 					if(float.TryParse(attributeString, out attributeFloat))
 					{
-						nodeTemplate.attributeTypes.Add(TINY_BINARY_XML_ATTRIBUTE_TYPE.FLOAT);
+						nodeTemplate.attributeTypes.Add(TB_XML_ATTRIBUTE_TYPE.FLOAT);
 					}
 					else
 					{
-						nodeTemplate.attributeTypes.Add(TINY_BINARY_XML_ATTRIBUTE_TYPE.STRING);
+						nodeTemplate.attributeTypes.Add(TB_XML_ATTRIBUTE_TYPE.STRING);
 					}
 					nodeTemplate.attributeNames.Add(xmlAttribute.Name);
 				}
 			}
 
-			TinyBinaryXmlNodeInstance nodeInstance = new TinyBinaryXmlNodeInstance();
-			nodeInstances.Add(nodeInstance);
-			nodeInstance.attributeValues = new List<object>();
-			nodeInstance.childrenIds = new List<ushort>();
-			nodeInstance.id = TinyBinaryXmlNodeInstance.idInc++;
-			nodeInstance.templateId = nodeTemplate.id;
-			parentTinyBinaryXmlNodeInstance.childrenIds.Add(nodeInstance.id);
+			TbXmlNode node = new TbXmlNode();
+			nodes.Add(node);
+			node.attributeValues = new List<object>();
+			node.childrenIds = new List<ushort>();
+			node.id = TbXmlNode.idInc++;
+			node.templateId = nodeTemplate.id;
+			parentNode.childrenIds.Add(node.id);
 			foreach(XmlAttribute xmlAttribute in xmlNode.Attributes)
 			{
 				string attributeString = xmlAttribute.Value;
 				float attributeFloat;
 				if(float.TryParse(attributeString, out attributeFloat))
 				{
-					nodeInstance.attributeValues.Add(attributeFloat);
+					node.attributeValues.Add(attributeFloat);
 				}
 				else
 				{
-					nodeInstance.attributeValues.Add(attributeString);
+					node.attributeValues.Add(attributeString);
 				}
 			}
 
@@ -99,25 +99,25 @@ namespace TinyBinaryXml
 			{
 				if(subXmlNode.NodeType == XmlNodeType.Element)
 				{
-					ProcessXmlNode(nodeInstance, subXmlNode);
+					ProcessXmlNode(node, subXmlNode);
 				}
 				else if(subXmlNode.NodeType == XmlNodeType.Text || subXmlNode.NodeType == XmlNodeType.CDATA)
 				{
-					if(nodeInstance.text == null)
+					if(node.text == null)
 					{
-						nodeInstance.text = subXmlNode.Value;
+						node.text = subXmlNode.Value;
 					}
 					else
 					{
-						nodeInstance.text += subXmlNode.Value;
+						node.text += subXmlNode.Value;
 					}
 				}
 			}
 		}
 
-		private TinyBinaryXmlNodeTemplate GetNodeTemplate(ushort templateId)
+		private TbXmlNodeTemplate GetNodeTemplate(ushort templateId)
 		{
-			foreach(TinyBinaryXmlNodeTemplate nodeTemplate in nodeTemplates)
+			foreach(TbXmlNodeTemplate nodeTemplate in nodeTemplates)
 			{
 				if(nodeTemplate.id == templateId)
 				{
@@ -127,9 +127,9 @@ namespace TinyBinaryXml
 			return null;
 		}
 
-		private TinyBinaryXmlNodeTemplate GetNodeTemplate(XmlNode xmlNode)
+		private TbXmlNodeTemplate GetNodeTemplate(XmlNode xmlNode)
 		{
-			foreach(TinyBinaryXmlNodeTemplate nodeTemplate in nodeTemplates)
+			foreach(TbXmlNodeTemplate nodeTemplate in nodeTemplates)
 			{
 				if(XmlNodeMatchTemplate(xmlNode, nodeTemplate))
 				{
@@ -139,7 +139,7 @@ namespace TinyBinaryXml
 			return null;
 		}
 
-		private bool XmlNodeMatchTemplate(XmlNode xmlNode, TinyBinaryXmlNodeTemplate nodeTemplate)
+		private bool XmlNodeMatchTemplate(XmlNode xmlNode, TbXmlNodeTemplate nodeTemplate)
 		{
 			if(nodeTemplate.name != xmlNode.Name)
 			{
@@ -159,19 +159,19 @@ namespace TinyBinaryXml
 		private void Serialize(BinaryWriter binaryWriter)
 		{
 			binaryWriter.Write((ushort)nodeTemplates.Count);
-			foreach(TinyBinaryXmlNodeTemplate nodeTemplate in nodeTemplates)
+			foreach(TbXmlNodeTemplate nodeTemplate in nodeTemplates)
 			{
 				SerializeNodeTemplate(binaryWriter, nodeTemplate);
 			}
 
-			binaryWriter.Write((ushort)nodeInstances.Count);
-			foreach(TinyBinaryXmlNodeInstance nodeInstance in nodeInstances)
+			binaryWriter.Write((ushort)nodes.Count);
+			foreach(TbXmlNode node in nodes)
 			{
-				SerializeNodeInstance(binaryWriter, nodeInstance);
+				SerializeNode(binaryWriter, node);
 			}
 		}
 
-		private void SerializeNodeTemplate(BinaryWriter binaryWriter, TinyBinaryXmlNodeTemplate nodeTemplate)
+		private void SerializeNodeTemplate(BinaryWriter binaryWriter, TbXmlNodeTemplate nodeTemplate)
 		{
 			binaryWriter.Write(nodeTemplate.id);
 
@@ -183,30 +183,30 @@ namespace TinyBinaryXml
 				binaryWriter.Write(attributeName);
 			}
 
-			foreach(TINY_BINARY_XML_ATTRIBUTE_TYPE attributeType in nodeTemplate.attributeTypes)
+			foreach(TB_XML_ATTRIBUTE_TYPE attributeType in nodeTemplate.attributeTypes)
 			{
 				binaryWriter.Write((byte)attributeType);
 			}
 		}
 
-		private void SerializeNodeInstance(BinaryWriter binaryWriter, TinyBinaryXmlNodeInstance nodeInstance)
+		private void SerializeNode(BinaryWriter binaryWriter, TbXmlNode node)
 		{
-			TinyBinaryXmlNodeTemplate nodeTemplate = GetNodeTemplate(nodeInstance.templateId);
+			TbXmlNodeTemplate nodeTemplate = GetNodeTemplate(node.templateId);
 
-			binaryWriter.Write(nodeInstance.id);
+			binaryWriter.Write(node.id);
 
-			binaryWriter.Write(nodeInstance.templateId);
+			binaryWriter.Write(node.templateId);
 
-			binaryWriter.Write((ushort)nodeInstance.childrenIds.Count);
-			foreach(ushort childId in nodeInstance.childrenIds)
+			binaryWriter.Write((ushort)node.childrenIds.Count);
+			foreach(ushort childId in node.childrenIds)
 			{
 				binaryWriter.Write(childId);
 			}
 			
 			int attributeIndex = 0;
-			foreach(object attributeValue in nodeInstance.attributeValues)
+			foreach(object attributeValue in node.attributeValues)
 			{
-				if(nodeTemplate.attributeTypes[attributeIndex] == TINY_BINARY_XML_ATTRIBUTE_TYPE.FLOAT)
+				if(nodeTemplate.attributeTypes[attributeIndex] == TB_XML_ATTRIBUTE_TYPE.FLOAT)
 				{
 					binaryWriter.Write((float)attributeValue);
 				}
@@ -217,14 +217,14 @@ namespace TinyBinaryXml
 				++attributeIndex;
 			}
 
-			if(string.IsNullOrEmpty(nodeInstance.text))
+			if(string.IsNullOrEmpty(node.text))
 			{
 				binaryWriter.Write((byte)0);
 			}
 			else
 			{
 				binaryWriter.Write((byte)1);
-				binaryWriter.Write(nodeInstance.text);
+				binaryWriter.Write(node.text);
 			}
 		}
 	}
