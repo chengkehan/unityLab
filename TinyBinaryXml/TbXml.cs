@@ -8,9 +8,9 @@ namespace TinyBinaryXml
 {
 	public class TbXml
 	{
-		public List<TbXmlNodeTemplate> nodeTemplates = null;
+		internal List<TbXmlNodeTemplate> nodeTemplates = null;
 
-		public List<TbXmlNode> nodes = null;
+		internal List<TbXmlNode> nodes = null;
 
 		public TbXmlNode docNode = null;
 

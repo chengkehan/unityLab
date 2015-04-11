@@ -3,18 +3,16 @@ using System.Collections.Generic;
 namespace TinyBinaryXml
 {
 	public class TbXmlNode
-	{
-		public static ushort idInc = 0;
+	{	
+		internal ushort id = 0;
 		
-		public ushort id = 0;
+		internal List<ushort> childrenIds = null;
 		
-		public List<ushort> childrenIds = null;
+		internal ushort templateId = 0;
 		
-		public ushort templateId = 0;
-		
-		public List<object> attributeValues = null;
+		internal List<object> attributeValues = null;
 
-		public TbXml tbXml = null;
+		internal TbXml tbXml = null;
 
 		public string text = null;
 

@@ -39,7 +39,7 @@ namespace TinyBinaryXml
 			tbXml.docNode.tbXml = tbXml;
 
 			binaryReader.Close();
-			binaryReader.Dispose();
+//			binaryReader.Dispose();
 
 			return tbXml;
 		}

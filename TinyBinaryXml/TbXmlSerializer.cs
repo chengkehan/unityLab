@@ -13,12 +13,19 @@ namespace TinyBinaryXml
 
 		private List<TbXmlNode> nodes = new List<TbXmlNode>();
 
+		private ushort nodeIdInc = 0;
+
+		private ushort nodeTemplateIdInc = 0;
+
 		public byte[] SerializeXmlString(string xmlString)
 		{
 			if(string.IsNullOrEmpty(xmlString))
 			{
 				return null;
 			}
+
+			nodeIdInc = 0;
+			nodeTemplateIdInc = 0;
 
 			XmlDocument doc = new XmlDocument();
 			doc.LoadXml(xmlString);
@@ -42,7 +49,7 @@ namespace TinyBinaryXml
 			binaryWriter.BaseStream.Position = 0;
 			binaryWriter.BaseStream.Read(buffer, 0, (int)binaryWriter.BaseStream.Length);
 			binaryWriter.Close();
-			binaryWriter.Dispose();
+//			binaryWriter.Dispose();
 
 			return buffer;
 		}
@@ -56,7 +63,7 @@ namespace TinyBinaryXml
 				nodeTemplates.Add(nodeTemplate);
 				nodeTemplate.attributeNames = new List<string>();
 				nodeTemplate.attributeTypes = new List<TB_XML_ATTRIBUTE_TYPE>();
-				nodeTemplate.id = TbXmlNodeTemplate.idInc++;
+				nodeTemplate.id = nodeTemplateIdInc++;
 				nodeTemplate.name = xmlNode.Name;
 				foreach(XmlAttribute xmlAttribute in xmlNode.Attributes)
 				{
@@ -78,7 +85,7 @@ namespace TinyBinaryXml
 			nodes.Add(node);
 			node.attributeValues = new List<object>();
 			node.childrenIds = new List<ushort>();
-			node.id = TbXmlNode.idInc++;
+			node.id = nodeIdInc++;
 			node.templateId = nodeTemplate.id;
 			parentNode.childrenIds.Add(node.id);
 			foreach(XmlAttribute xmlAttribute in xmlNode.Attributes)
