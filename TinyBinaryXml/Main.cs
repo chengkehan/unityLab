@@ -65,7 +65,7 @@ namespace TinyBinaryXml
 			TinyBinaryXmlDeserializer deserializer = new TinyBinaryXmlDeserializer();
 			byte[] bytes = File.ReadAllBytes("/Users/jimCheng/Desktop/BinaryXml.bytes");
 			TinyBinaryXml tinyBinaryXml = deserializer.DeserializeXmlBytes(bytes);
-			List<TinyBinaryXmlNodeInstance> nodes = tinyBinaryXml.GetNodes("Buff/Property");
+			List<TinyBinaryXmlNodeInstance> nodes = tinyBinaryXml.docNodeInstance.GetNodes("Buff/Property");
 			
 			Console.WriteLine(DateTime.Now - time);
 			
