@@ -98,9 +98,9 @@ namespace TinyBinaryXml
 				node.attributeValues = new List<object>(numAttributes);
 				for(ushort i = 0; i < numAttributes; ++i)
 				{
-					if(nodeTemplate.attributeTypes[i] == TB_XML_ATTRIBUTE_TYPE.FLOAT)
+					if(nodeTemplate.attributeTypes[i] == TB_XML_ATTRIBUTE_TYPE.DOUBLE)
 					{
-						node.attributeValues.Add(binaryReader.ReadSingle());
+						node.attributeValues.Add(binaryReader.ReadDouble());
 					}
 					else
 					{

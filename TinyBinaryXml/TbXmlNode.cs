@@ -18,37 +18,45 @@ namespace TinyBinaryXml
 
 		public string GetStringValue(string name)
 		{
-			return GetValue(ref name).ToString();
+			object value = GetValue(ref name);
+			if(value is string)
+			{
+				return value as string;
+			}
+			else
+			{
+				return value.ToString();
+			}
 		}
 
 		public float GetFloatValue(string name)
 		{
-			return (float)GetValue(ref name);
+            return (float)(double)GetValue(ref name);
 		}
 
 		public int GetIntValue(string name)
 		{
-			return (int)(float)GetValue(ref name);
+			return (int)(double)GetValue(ref name);
 		}
 
 		public uint GetUIntValue(string name)
 		{
-			return (uint)(float)GetValue(ref name);
+            return (uint)(double)GetValue(ref name);
 		}
 
 		public byte GetByteValue(string name)
 		{
-			return (byte)(float)GetValue(ref name);
+            return (byte)(double)GetValue(ref name);
 		}
 
 		public ushort GetUShortValue(string name)
 		{
-			return (ushort)(float)GetValue(ref name);
+            return (ushort)(double)GetValue(ref name);
 		}
 
 		public short GetShortValue(string name)
 		{
-			return (short)(float)GetValue(ref name);
+            return (short)(double)GetValue(ref name);
 		}
 
 		private object GetValue(ref string name)

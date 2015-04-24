@@ -71,7 +71,7 @@ namespace TinyBinaryXml
 					float attributeFloat;
 					if(float.TryParse(attributeString, out attributeFloat))
 					{
-						nodeTemplate.attributeTypes.Add(TB_XML_ATTRIBUTE_TYPE.FLOAT);
+						nodeTemplate.attributeTypes.Add(TB_XML_ATTRIBUTE_TYPE.DOUBLE);
 					}
 					else
 					{
@@ -91,8 +91,8 @@ namespace TinyBinaryXml
 			foreach(XmlAttribute xmlAttribute in xmlNode.Attributes)
 			{
 				string attributeString = xmlAttribute.Value;
-				float attributeFloat;
-				if(float.TryParse(attributeString, out attributeFloat))
+                double attributeFloat;
+				if(double.TryParse(attributeString, out attributeFloat))
 				{
 					node.attributeValues.Add(attributeFloat);
 				}
@@ -153,13 +153,24 @@ namespace TinyBinaryXml
 				return false;
 			}
 
-			foreach(XmlAttribute xmlAttribute in xmlNode.Attributes)
-			{
-				if(nodeTemplate.attributeNames != null && !nodeTemplate.attributeNames.Contains(xmlAttribute.Name))
-				{
-					return false;
-				}
-			}
+            XmlAttributeCollection xmlAttributes = xmlNode.Attributes;
+            int numAttributes = xmlAttributes == null ? 0 : xmlAttributes.Count;
+            for (int i = 0; i < numAttributes; ++i)
+            {
+                XmlAttribute xmlAttribute = xmlAttributes[i];
+                if (nodeTemplate.attributeNames != null && !nodeTemplate.attributeNames[i].Equals(xmlAttribute.Name))
+                {
+                    return false;
+                }
+
+                double attributeFloat;
+                bool isAttributeFloat = double.TryParse(xmlAttribute.Value, out attributeFloat);
+                if ((isAttributeFloat && nodeTemplate.attributeTypes[i] != TB_XML_ATTRIBUTE_TYPE.DOUBLE) || 
+                    (!isAttributeFloat && nodeTemplate.attributeTypes[i] == TB_XML_ATTRIBUTE_TYPE.DOUBLE))
+                {
+                    return false;
+                }
+            }
 			return xmlNode.Attributes.Count == nodeTemplate.attributeNames.Count;
 		}
 
@@ -213,9 +224,9 @@ namespace TinyBinaryXml
 			int attributeIndex = 0;
 			foreach(object attributeValue in node.attributeValues)
 			{
-				if(nodeTemplate.attributeTypes[attributeIndex] == TB_XML_ATTRIBUTE_TYPE.FLOAT)
+				if(nodeTemplate.attributeTypes[attributeIndex] == TB_XML_ATTRIBUTE_TYPE.DOUBLE)
 				{
-					binaryWriter.Write((float)attributeValue);
+                    binaryWriter.Write((double)attributeValue);
 				}
 				else
 				{
