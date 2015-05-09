@@ -106,13 +106,16 @@ namespace TinyBinaryXml
 			node.id = binaryReader.ReadUInt16();
 			node.templateId = binaryReader.ReadUInt16();
 
-			ushort numChildren = binaryReader.ReadUInt16();
-			if(numChildren > 0)
+			if(binaryReader.ReadByte() == 1)
 			{
-				node.childrenIds = new List<ushort>(numChildren);
-				for(int i = 0; i < numChildren; ++i)
+				ushort numChildren = binaryReader.ReadUInt16();
+				if(numChildren > 0)
 				{
-					node.childrenIds.Add(binaryReader.ReadUInt16());
+					node.childrenIds = new List<ushort>(numChildren);
+					for(int i = 0; i < numChildren; ++i)
+					{
+						node.childrenIds.Add(binaryReader.ReadUInt16());
+					}
 				}
 			}
 

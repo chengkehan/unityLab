@@ -309,10 +309,18 @@ namespace TinyBinaryXml
 
 			binaryWriter.Write(node.templateId);
 
-			binaryWriter.Write((ushort)node.childrenIds.Count);
-			foreach(ushort childId in node.childrenIds)
+			if(node.childrenIds.Count == 0)
 			{
-				binaryWriter.Write(childId);
+				binaryWriter.Write((byte)0);
+			}
+			else
+			{
+				binaryWriter.Write((byte)1);
+				binaryWriter.Write((ushort)node.childrenIds.Count);
+				foreach(ushort childId in node.childrenIds)
+				{
+					binaryWriter.Write(childId);
+				}
 			}
 			
 			int attributeIndex = 0;
