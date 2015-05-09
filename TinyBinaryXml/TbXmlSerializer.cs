@@ -13,6 +13,10 @@ namespace TinyBinaryXml
 
 		private List<TbXmlNode> nodes = new List<TbXmlNode>();
 
+        private List<string> stringPool = new List<string>();
+
+        private List<double> valuePool = new List<double>();
+
 		private ushort nodeIdInc = 0;
 
 		private ushort nodeTemplateIdInc = 0;
@@ -24,6 +28,10 @@ namespace TinyBinaryXml
 				return null;
 			}
 
+            nodeTemplates.Clear();
+            nodes.Clear();
+            stringPool.Clear();
+            valuePool.Clear();
 			nodeIdInc = 0;
 			nodeTemplateIdInc = 0;
 
@@ -49,7 +57,7 @@ namespace TinyBinaryXml
 			binaryWriter.BaseStream.Position = 0;
 			binaryWriter.BaseStream.Read(buffer, 0, (int)binaryWriter.BaseStream.Length);
 			binaryWriter.Close();
-//			binaryWriter.Dispose();
+			binaryWriter.Dispose();
 
 			return buffer;
 		}
@@ -68,8 +76,8 @@ namespace TinyBinaryXml
 				foreach(XmlAttribute xmlAttribute in xmlNode.Attributes)
 				{
 					string attributeString = xmlAttribute.Value;
-					float attributeFloat;
-					if(float.TryParse(attributeString, out attributeFloat))
+					double attributeDouble;
+					if(double.TryParse(attributeString, out attributeDouble))
 					{
 						nodeTemplate.attributeTypes.Add(TB_XML_ATTRIBUTE_TYPE.DOUBLE);
 					}
@@ -83,7 +91,7 @@ namespace TinyBinaryXml
 
 			TbXmlNode node = new TbXmlNode();
 			nodes.Add(node);
-			node.attributeValues = new List<object>();
+			node.attributeValues = new List<int>();
 			node.childrenIds = new List<ushort>();
 			node.id = nodeIdInc++;
 			node.templateId = nodeTemplate.id;
@@ -91,14 +99,32 @@ namespace TinyBinaryXml
 			foreach(XmlAttribute xmlAttribute in xmlNode.Attributes)
 			{
 				string attributeString = xmlAttribute.Value;
-                double attributeFloat;
-				if(double.TryParse(attributeString, out attributeFloat))
+                double attributeDouble;
+				if(double.TryParse(attributeString, out attributeDouble))
 				{
-					node.attributeValues.Add(attributeFloat);
+                    int valueIndex = MatchValueIndex(attributeDouble);
+                    if (valueIndex == -1)
+                    {
+                        valuePool.Add(attributeDouble);
+                        node.attributeValues.Add(valuePool.Count - 1);
+                    }
+                    else
+                    {
+                        node.attributeValues.Add(valueIndex);
+                    }
 				}
 				else
 				{
-					node.attributeValues.Add(attributeString);
+                    int stringIndex = MatchStringIndex(attributeString);
+                    if (stringIndex == -1)
+                    {
+                        stringPool.Add(attributeString);
+                        node.attributeValues.Add(stringPool.Count - 1);
+                    }
+                    else
+                    {
+                        node.attributeValues.Add(stringIndex);
+                    }
 				}
 			}
 
@@ -110,17 +136,60 @@ namespace TinyBinaryXml
 				}
 				else if(subXmlNode.NodeType == XmlNodeType.Text || subXmlNode.NodeType == XmlNodeType.CDATA)
 				{
-					if(node.text == null)
+					if(node.text == -1)
 					{
-						node.text = subXmlNode.Value;
+                        int stringIndex = MatchStringIndex(subXmlNode.Value);
+                        if (stringIndex == -1)
+                        {
+                            stringPool.Add(subXmlNode.Value);
+                            node.text = stringPool.Count - 1;
+                        }
+                        else
+                        {
+                            node.text = stringIndex;
+                        }
 					}
 					else
 					{
-						node.text += subXmlNode.Value;
+						Console.WriteLine("Ignore yyy of <nodeA>xxx<nodeB/>yyy<nodeA/>");
+						Console.WriteLine(subXmlNode.InnerText);
+//                        UnityEngine.Debug.LogError("Ignore yyy of <nodeA>xxx<nodeB/>yyy<nodeA/>");
+//                        UnityEngine.Debug.LogError(subXmlNode.InnerText);
 					}
 				}
 			}
 		}
+
+        private int MatchStringIndex(string str)
+        {
+            if (str == null)
+            {
+                str = "null";
+            }
+
+            int numStrings = stringPool.Count;
+            for (int i = 0; i < numStrings; ++i)
+            {
+                if (stringPool[i] == str)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        private int MatchValueIndex(double value)
+        {
+            int numValues = valuePool.Count;
+            for (int i = 0; i < numValues; ++i)
+            {
+                if (valuePool[i] == value)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
 
 		private TbXmlNodeTemplate GetNodeTemplate(ushort templateId)
 		{
@@ -163,10 +232,10 @@ namespace TinyBinaryXml
                     return false;
                 }
 
-                double attributeFloat;
-                bool isAttributeFloat = double.TryParse(xmlAttribute.Value, out attributeFloat);
-                if ((isAttributeFloat && nodeTemplate.attributeTypes[i] != TB_XML_ATTRIBUTE_TYPE.DOUBLE) || 
-                    (!isAttributeFloat && nodeTemplate.attributeTypes[i] == TB_XML_ATTRIBUTE_TYPE.DOUBLE))
+                double attributeDouble;
+                bool isAttributeDouble = double.TryParse(xmlAttribute.Value, out attributeDouble);
+                if ((isAttributeDouble && nodeTemplate.attributeTypes[i] != TB_XML_ATTRIBUTE_TYPE.DOUBLE) || 
+                    (!isAttributeDouble && nodeTemplate.attributeTypes[i] == TB_XML_ATTRIBUTE_TYPE.DOUBLE))
                 {
                     return false;
                 }
@@ -187,7 +256,34 @@ namespace TinyBinaryXml
 			{
 				SerializeNode(binaryWriter, node);
 			}
+
+            SerializeStirngPool(binaryWriter);
+            SerializeValuePool(binaryWriter);
 		}
+
+        private void SerializeStirngPool(BinaryWriter binaryWriter)
+        {
+            int numStrings = stringPool.Count;
+
+            binaryWriter.Write(numStrings);
+
+            for (int i = 0; i < numStrings; ++i)
+            {
+                binaryWriter.Write(stringPool[i]);
+            }
+        }
+
+        private void SerializeValuePool(BinaryWriter binaryWriter)
+        {
+            int numValues = valuePool.Count;
+
+            binaryWriter.Write(numValues);
+
+            for (int i = 0; i < numValues; ++i)
+            {
+                binaryWriter.Write(valuePool[i]);
+            }
+        }
 
 		private void SerializeNodeTemplate(BinaryWriter binaryWriter, TbXmlNodeTemplate nodeTemplate)
 		{
@@ -209,8 +305,6 @@ namespace TinyBinaryXml
 
 		private void SerializeNode(BinaryWriter binaryWriter, TbXmlNode node)
 		{
-			TbXmlNodeTemplate nodeTemplate = GetNodeTemplate(node.templateId);
-
 			binaryWriter.Write(node.id);
 
 			binaryWriter.Write(node.templateId);
@@ -222,20 +316,13 @@ namespace TinyBinaryXml
 			}
 			
 			int attributeIndex = 0;
-			foreach(object attributeValue in node.attributeValues)
+			foreach(int attributeValue in node.attributeValues)
 			{
-				if(nodeTemplate.attributeTypes[attributeIndex] == TB_XML_ATTRIBUTE_TYPE.DOUBLE)
-				{
-                    binaryWriter.Write((double)attributeValue);
-				}
-				else
-				{
-					binaryWriter.Write((string)attributeValue);
-				}
+                binaryWriter.Write(attributeValue);
 				++attributeIndex;
 			}
 
-			if(string.IsNullOrEmpty(node.text))
+			if(node.text == -1)
 			{
 				binaryWriter.Write((byte)0);
 			}

@@ -12,6 +12,10 @@ namespace TinyBinaryXml
 
 		internal List<TbXmlNode> nodes = null;
 
+        internal List<string> stringPool = null;
+
+        internal List<double> valuePool = null;
+
 		public TbXmlNode docNode = null;
 
 		public static TbXml Load(byte[] xmlBytes)

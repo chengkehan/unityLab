@@ -10,53 +10,117 @@ namespace TinyBinaryXml
 		
 		internal ushort templateId = 0;
 		
-		internal List<object> attributeValues = null;
+		internal List<int> attributeValues = null;
 
 		internal TbXml tbXml = null;
 
-		public string text = null;
+		internal int text = -1;
+
+        public string GetText()
+        {
+            if (text == -1)
+            {
+                return string.Empty;
+            }
+            else
+            {
+                return tbXml.stringPool[text];
+            }
+        }
 
 		public string GetStringValue(string name)
 		{
 			object value = GetValue(ref name);
-			if(value is string)
+            if (value == null)
+            {
+                return string.Empty;
+            }
+			if(value is double)
 			{
-				return value as string;
+				return value.ToString();
 			}
 			else
 			{
-				return value.ToString();
+				return value as string;
 			}
 		}
 
 		public float GetFloatValue(string name)
 		{
-            return (float)(double)GetValue(ref name);
+            object value = GetValue(ref name);
+            if (value is double)
+            {
+                return (float)(double)value;
+            }
+            else
+            {
+                return 0.0f;
+            }
 		}
 
 		public int GetIntValue(string name)
 		{
-			return (int)(double)GetValue(ref name);
+            object value = GetValue(ref name);
+            if (value is double)
+            {
+                return (int)(double)value;
+            }
+            else
+            {
+                return 0;
+            }
 		}
 
 		public uint GetUIntValue(string name)
 		{
-            return (uint)(double)GetValue(ref name);
+            object value = GetValue(ref name);
+            if (value is double)
+            {
+                return (uint)(double)value;
+            }
+            else
+            {
+                return 0;
+            }
 		}
 
 		public byte GetByteValue(string name)
 		{
-            return (byte)(double)GetValue(ref name);
+            object value = GetValue(ref name);
+            if (value is double)
+            {
+                return (byte)(double)value;
+            }
+            else
+            {
+                return 0;
+            }
 		}
 
 		public ushort GetUShortValue(string name)
 		{
-            return (ushort)(double)GetValue(ref name);
+            object value = GetValue(ref name);
+            if (value is double)
+            {
+                return (ushort)(double)value;
+            }
+            else
+            {
+                return 0;
+            }
 		}
 
 		public short GetShortValue(string name)
 		{
-            return (short)(double)GetValue(ref name);
+            object value = GetValue(ref name);
+            if (value is double)
+            {
+                return (short)(double)value;
+            }
+            else
+            {
+                return 0;
+            }
 		}
 
 		private object GetValue(ref string name)
@@ -65,11 +129,18 @@ namespace TinyBinaryXml
 			int attributeIndex;
 			if(nodeTemplate.attributeNameIndexMapping.TryGetValue(name, out attributeIndex))
 			{
-				return attributeValues[attributeIndex];
+                if (nodeTemplate.attributeTypes[attributeIndex] == TB_XML_ATTRIBUTE_TYPE.DOUBLE)
+                {
+                    return tbXml.valuePool[attributeValues[attributeIndex]];
+                }
+                else
+                {
+                    return tbXml.stringPool[attributeValues[attributeIndex]];
+                }
 			}
 			else
 			{
-				return string.Empty;
+				return null;
 			}
 		}
 

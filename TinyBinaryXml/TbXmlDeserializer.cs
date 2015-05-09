@@ -33,16 +33,41 @@ namespace TinyBinaryXml
 				tbXml.nodes[i].tbXml = tbXml;
 			}
 
+            DeserializeStringPool(binaryReader, tbXml);
+            DeserializeValuePool(binaryReader, tbXml);
+
 			tbXml.docNode = new TbXmlNode();
 			tbXml.docNode.childrenIds = new List<ushort>();
 			tbXml.docNode.childrenIds.Add(0);
 			tbXml.docNode.tbXml = tbXml;
 
 			binaryReader.Close();
-//			binaryReader.Dispose();
+			binaryReader.Dispose();
 
 			return tbXml;
 		}
+
+        private void DeserializeStringPool(BinaryReader binaryReader, TbXml tbXml)
+        {
+            int numStirngs = binaryReader.ReadInt32();
+            tbXml.stringPool = new List<string>(numStirngs);
+
+            for (int i = 0; i < numStirngs; ++i)
+            {
+                tbXml.stringPool.Add(binaryReader.ReadString());
+            }
+        }
+
+        private void DeserializeValuePool(BinaryReader binaryReader, TbXml tbXml)
+        {
+            int numValues = binaryReader.ReadInt32();
+            tbXml.valuePool = new List<double>(numValues);
+
+            for (int i = 0; i < numValues; ++i)
+            {
+                tbXml.valuePool.Add(binaryReader.ReadDouble());
+            }
+        }
 
 		private void DeserializeNodeTemplate(BinaryReader binaryReader, ushort index, TbXml tbXml)
 		{
@@ -95,24 +120,17 @@ namespace TinyBinaryXml
 			ushort numAttributes = (ushort)(nodeTemplate.attributeNames == null ? 0 : nodeTemplate.attributeNames.Count);
 			if(numAttributes > 0)
 			{
-				node.attributeValues = new List<object>(numAttributes);
+				node.attributeValues = new List<int>(numAttributes);
 				for(ushort i = 0; i < numAttributes; ++i)
 				{
-					if(nodeTemplate.attributeTypes[i] == TB_XML_ATTRIBUTE_TYPE.DOUBLE)
-					{
-						node.attributeValues.Add(binaryReader.ReadDouble());
-					}
-					else
-					{
-						node.attributeValues.Add(binaryReader.ReadString());
-					}
+                    node.attributeValues.Add(binaryReader.ReadInt32());
 				}
 			}
 
 			byte hasText = binaryReader.ReadByte();
 			if(hasText == 1)
 			{
-				node.text = binaryReader.ReadString();
+				node.text = binaryReader.ReadInt32();
 			}
 		}
 	}
