@@ -48,6 +48,7 @@ public class LuaSublimeSnippet
 
 	private static void ProcessLuaScript(StringReader reader)
 	{
+		int index = 0;
 		while(true)
 		{
 			string line = reader.ReadLine();
@@ -66,7 +67,8 @@ public class LuaSublimeSnippet
 				string className = null;
 				if(CheckClassDeclaration(line, out className))
 				{
-
+					++index;
+					NewSnippet(className, className, "LuaClass." + className, "LuaClass." + className + "." + index);
 					continue;
 				}
 			}
@@ -77,7 +79,25 @@ public class LuaSublimeSnippet
 				string[] args = null;
 				if(CheckFunctionDefinition(line, out className, out methodName, out args))
 				{
-
+					++index;
+					string content = methodName + "(";
+					string tabTrigger = methodName;
+					string description = className + "." + methodName + "(";
+					string fileName = "LuaClass." + className + "." + methodName + "." + index;
+					int numArgs = args == null ? 0 : args.Length;
+					for(int i = 0; i < numArgs; ++i)
+					{
+						content += "{" + (i + 1) + ":" + args[i] + "}";
+						description += args[i];
+						if(i != numArgs - 1)
+						{
+							content += ", ";
+							description += ", ";
+						}
+					}
+					content += ")";
+					description += ")";
+					NewSnippet(content, tabTrigger, description, fileName);
 					continue;
 				}
 			}
@@ -87,7 +107,8 @@ public class LuaSublimeSnippet
 				string description = null;
 				if(CheckImportType(line, out type, out description))
 				{
-
+					++index;
+					NewSnippet(type, type, description, "ImportType" + "." + type + "." + index);
 					continue;
 				}
 			}
@@ -97,7 +118,8 @@ public class LuaSublimeSnippet
 				string description = null;
 				if(CheckNotificationCenterMessageID(line, out msgName, out description))
 				{
-
+					++index;
+					NewSnippet(msgName, msgName, "NotificationCenterMessageID." + msgName, "NotificationCenterMessageID." + msgName + "." + index);
 					continue;
 				}
 			}
@@ -106,7 +128,7 @@ public class LuaSublimeSnippet
 
 	private static bool CheckClassDeclaration(string line, out string className)
 	{
-		Regex regex = new Regex(@".+=.*class(.*)");
+		Regex regex = new Regex(@".+=\s*class(.*)");
 		if(regex.IsMatch(line))
 		{
 			className = line.Split('=')[0].Trim();
@@ -148,19 +170,6 @@ public class LuaSublimeSnippet
 					args[i] = args[i].Trim();
 				}
 			}
-			// Debug Print
-//			string info = className + ":" + methodName + "(";
-//			int argsCount = args == null ? 0 : args.Length;
-//			for(int i = 0; i < argsCount; ++i)
-//			{
-//				info += args[i];
-//				if(i != argsCount - 1)
-//				{
-//					info += ", ";
-//				}
-//			}
-//			info += ")";
-//			Debug.LogError(info);
 			return true;
 		}
 		else
