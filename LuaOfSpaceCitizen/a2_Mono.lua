@@ -1,0 +1,1 @@
+MonoObject = class()
