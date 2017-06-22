@@ -30,6 +30,11 @@ ShadowMap/Library
 ShadowMap/ProjectSettings
 ShadowMap/Temp
 
+KDopTree/Library
+KDopTree/Temp
+KDopTree/ProjectSettings
+KDopTree/obj
+
 SequenceFrameMeshAnimation/Library
 SequenceFrameMeshAnimation/ProjectSettings
 SequenceFrameMeshAnimation/Temp
@@ -63,3 +68,4 @@ SequenceFrameMeshAnimation/Assets/Test.cs
 SequenceFrameMeshAnimation/Assets/Test.cs.meta
 
 TinyBinaryXml/bin/Debug/TinyBinaryXml.exe
+KDopTree/.vs/KDopTree/v14/.suo
