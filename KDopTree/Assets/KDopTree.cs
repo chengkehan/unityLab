@@ -31,9 +31,10 @@ public class KDopTree
 
         BuildTriangles(mesh);
 
-        // Add Root Node
-        nodes.Add(new KDopNode());
-        nodes[0].SplitTriangleList(0, triangles.Count, this);
+        KDopNode rootNode = new KDopNode();
+        nodes.Add(rootNode);
+        rootNode.SplitTriangleList(0, triangles.Count, this);
+        nodes[0] = rootNode;
     }
 
     private void BuildTriangles(Mesh mesh)
@@ -78,13 +79,13 @@ public class KDopTree
 
 public struct KDopNode
 {
-    public Bounds boundingVolumes;
+    public KDopBounds boundingVolumes;
 
     public bool isLeaf;
 
     public KDopNodeData data;
 
-    public void SplitTriangleList(int startTriangleIndex, int numTriangles, KDopTree kDopTree)
+    public KDopBounds SplitTriangleList(int startIndex, int numTriangles, KDopTree kDopTree)
     {
         if(numTriangles > 4)
         {
@@ -97,12 +98,12 @@ public struct KDopNode
             {
                 float Mean = 0.0f;
                 float Variance = 0.0f;
-                for (int nTriangle = startTriangleIndex; nTriangle < startTriangleIndex + numTriangles; nTriangle++)
+                for (int nTriangle = startIndex; nTriangle < startIndex + numTriangles; nTriangle++)
                 {
                     Mean += kDopTree.triangles[nTriangle].GetCentroid()[nPlane];
                 }
                 Mean /= (float)numTriangles;
-                for (int nTriangle = startTriangleIndex; nTriangle < startTriangleIndex + numTriangles; nTriangle++)
+                for (int nTriangle = startIndex; nTriangle < startIndex + numTriangles; nTriangle++)
                 {
                     float Dot = kDopTree.triangles[nTriangle].GetCentroid()[nPlane];
                     Variance += (Dot - Mean) * (Dot - Mean);
@@ -116,8 +117,8 @@ public struct KDopNode
                 }
             }
 
-            int Left = startTriangleIndex - 1;
-            int Right = startTriangleIndex + numTriangles;
+            int Left = startIndex - 1;
+            int Right = startIndex + numTriangles;
             while (Left < Right)
             {
                 float Dot;
@@ -138,15 +139,47 @@ public struct KDopNode
                     kDopTree.triangles[Right] = Temp;
                 }
             }
-            if (Left == startTriangleIndex + numTriangles || Right == startTriangleIndex)
+            if (Left == startIndex + numTriangles || Right == startIndex)
             {
-                Left = startTriangleIndex + (numTriangles / 2);
+                Left = startIndex + (numTriangles / 2);
             }
+
+            KDopNode leftNode = new KDopNode();
+            int leftNodeIndex = kDopTree.nodes.Count;
+            kDopTree.nodes.Add(leftNode);
+            data.leftNode = leftNodeIndex;
+
+            KDopNode rightNode = new KDopNode();
+            int rightNodeIndex = kDopTree.nodes.Count;
+            kDopTree.nodes.Add(rightNode);
+            data.rightNode = rightNodeIndex;
+
+            KDopBounds leftBoundingVolume = leftNode.SplitTriangleList(startIndex, Left - startIndex, kDopTree);
+            KDopBounds rightBoundingVolume = rightNode.SplitTriangleList(Left, startIndex + numTriangles - Left, kDopTree);
+
+            boundingVolumes.Encapsulate(leftBoundingVolume);
+            boundingVolumes.Encapsulate(rightBoundingVolume);
+
+            kDopTree.nodes[leftNodeIndex] = leftNode;
+            kDopTree.nodes[rightNodeIndex] = rightNode;
         }
         else
         {
             isLeaf = true;
+
+            data.startIndex = startIndex;
+            data.numTriangles = numTriangles;
+
+            for (int triIndex = data.startIndex; triIndex < data.startIndex + numTriangles; ++triIndex)
+            {
+                KDopTriangle tri = kDopTree.triangles[triIndex];
+                boundingVolumes.Encapsulate(tri.v0);
+                boundingVolumes.Encapsulate(tri.v1);
+                boundingVolumes.Encapsulate(tri.v2);
+            }
         }
+
+        return boundingVolumes;
     }
 }
 
@@ -191,6 +224,97 @@ public struct KDopTriangle
     }
 }
 
+public struct KDopBounds
+{
+    public Vector3 min;
+
+    public Vector3 max;
+
+    public bool isValid;
+
+    public Vector3 Center
+    {
+        get
+        {
+            if(isValid)
+            {
+                return min + (max - min) * 0.5f;
+            }
+            else
+            {
+                return Vector3.zero;
+            }
+        }
+    }
+
+    public Vector3 Size
+    {
+        get
+        {
+            if(isValid)
+            {
+                return max - min;
+            }
+            else
+            {
+                return Vector3.zero;
+            }
+        }
+    }
+
+    public void Encapsulate(KDopBounds otherBounds)
+    {
+        if(isValid && otherBounds.isValid)
+        {
+            min.x = Mathf.Min(min.x, otherBounds.min.x);
+            min.y = Mathf.Min(min.y, otherBounds.min.y);
+            min.z = Mathf.Min(min.z, otherBounds.min.z);
+
+            max.x = Mathf.Max(max.x, otherBounds.max.x);
+            max.y = Mathf.Max(max.y, otherBounds.max.y);
+            max.z = Mathf.Max(max.z, otherBounds.max.z);
+        }
+        else if(otherBounds.isValid)
+        {
+            min = otherBounds.min;
+            max = otherBounds.max;
+            isValid = true;
+        }
+        else
+        {
+            // Do nothing
+        }
+    }
+
+    public void Encapsulate(Vector3 otherPoint)
+    {
+        if(isValid)
+        {
+            min.x = Mathf.Min(min.x, otherPoint.x);
+            min.y = Mathf.Min(min.y, otherPoint.y);
+            min.z = Mathf.Min(min.z, otherPoint.z);
+
+            max.x = Mathf.Max(max.x, otherPoint.x);
+            max.y = Mathf.Max(max.y, otherPoint.y);
+            max.z = Mathf.Max(max.z, otherPoint.z);
+        }
+        else
+        {
+            min = otherPoint;
+            max = otherPoint;
+            isValid = true;
+        }
+    }
+
+    public override string ToString()
+    {
+        return 
+            "[" + GetType().Name + 
+            " min:" + min.x + "," + min.y + "," + min.z + 
+            " max:" + max.x + "," + max.y + "," + max.z + "]";
+    }
+}
+
 public static class KDopTreeVectorExtension
 {
     public static Vector3 GetSafeNormal(this Vector3 v)
@@ -206,6 +330,11 @@ public static class KDopTreeVectorExtension
         }
         v.x = v.y = v.z = 0.0f;
         return v;
+    }
+
+    public static string ToStringRaw(this Vector3 v)
+    {
+        return v.x + " " + v.y + " " + v.z;
     }
 
     public static bool IsUnit(this Vector3 v)
