@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System.Diagnostics;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -20,16 +21,21 @@ public class Test : MonoBehaviour
         if(kDopTree != null)
         {
             List<KDopNode> nodes = kDopTree.nodes;
+            int leafCount = 0;
             for(int nodeIndex = 0; nodeIndex < nodes.Count; ++nodeIndex)
             {
-                if(nodeIndex == depth)
+                if(leafCount == depth)
                 {
                     break;
                 }
-                Gizmos.color = colors[nodeIndex];
                 KDopNode node = kDopTree.nodes[nodeIndex];
-                KDopBounds bounds = node.boundingVolumes;
-                Gizmos.DrawWireCube(bounds.Center, bounds.Size);
+                if (node.isLeaf)
+                {
+                    ++leafCount;
+                    KDopBounds bounds = node.boundingVolumes;
+                    Gizmos.color = colors[nodeIndex % colors.Length];
+                    Gizmos.DrawWireCube(bounds.Center, bounds.Size);
+                }
             }
         }
     }
@@ -43,6 +49,10 @@ public class Test : MonoBehaviour
         }
 
         kDopTree = new KDopTree();
+        Stopwatch stopWatch = new Stopwatch();
+        stopWatch.Start();
         kDopTree.Build(mf.mesh);
+        stopWatch.Stop();
+        UnityEngine.Debug.LogError("Elapsed Milliseconds for Building KDopTree:" + stopWatch.ElapsedMilliseconds);
     }
 }

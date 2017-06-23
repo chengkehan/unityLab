@@ -37,6 +37,16 @@ public class KDopTree
         nodes[0] = rootNode;
     }
 
+    public bool LineCheck(KDopCollisionCheck check)
+    {
+        if(nodes == null || nodes.Count == 0)
+        {
+            return false;
+        }
+
+        return nodes[0].LineCheck(check);
+    }
+
     private void BuildTriangles(Mesh mesh)
     {
         List<int[]> trisList = new List<int[]>();
@@ -181,6 +191,11 @@ public struct KDopNode
 
         return boundingVolumes;
     }
+
+    public bool LineCheck(KDopCollisionCheck check)
+    {
+        return false;
+    }
 }
 
 [StructLayout(LayoutKind.Explicit)]
@@ -212,7 +227,7 @@ public struct KDopTriangle
 
     public Vector4 GetNormalPlane()
     {
-        Vector3 normal = Vector3.Cross(v1 - v0, v2 - v0).GetSafeNormal();
+        Vector3 normal = GetNormal();
         Vector4 normalPlane = new Vector4(normal.x, normal.y, normal.z, 0);
         normalPlane.w = Vector3.Dot(v0, normal);
         return normalPlane;
@@ -315,6 +330,47 @@ public struct KDopBounds
     }
 }
 
+public struct KDopCollisionCheck
+{
+    public Vector3 worldStart;
+
+    public Vector3 worldEnd;
+
+    public Matrix4x4 worldToLocal;
+
+    public KDopHitResult hitResult;
+
+    public Vector3 localStart;
+
+    public Vector3 localEnd;
+
+    public Vector3 localDir;
+
+    public Vector3 localOneOverDir;
+
+    public KDopCollisionCheck(Vector3 worldStart, Vector3 worldEnd, Matrix4x4 worldToLocal)
+    {
+        this.worldStart = worldStart;
+        this.worldEnd = worldEnd;
+        this.worldToLocal = worldToLocal;
+
+        this.localStart = worldToLocal.MultiplyPoint(worldStart);
+        this.localEnd = worldToLocal.MultiplyPoint(worldEnd);
+        this.localDir = this.localEnd - this.localStart;
+        this.localOneOverDir = this.localDir.Inverse();
+
+        hitResult = new KDopHitResult();
+        hitResult.hitTriangle = -1;
+    }
+}
+
+public struct KDopHitResult
+{
+    public int hitTriangle;
+
+    public float hitTime;
+}
+
 public static class KDopTreeVectorExtension
 {
     public static Vector3 GetSafeNormal(this Vector3 v)
@@ -329,6 +385,14 @@ public static class KDopTreeVectorExtension
             return v;
         }
         v.x = v.y = v.z = 0.0f;
+        return v;
+    }
+
+    public static Vector3 Inverse(this Vector3 v)
+    {
+        v.x = 1.0f / v.x;
+        v.y = 1.0f / v.y;
+        v.z = 1.0f / v.z;
         return v;
     }
 
