@@ -55,13 +55,15 @@ public class Test : MonoBehaviour
             if (check.HitResult.isHit)
             {
                 KDopTriangle tri = kDopTree.triangles[check.HitResult.hitTriangle];
+                Vector3 hitPoint = check.LocalStart + check.HitResult.hitTime * check.LocalDir;
 
                 Gizmos.matrix = mf.transform.localToWorldMatrix;
                 Gizmos.color = Color.red;
                 Gizmos.DrawLine(tri.v0, tri.v1);
                 Gizmos.DrawLine(tri.v1, tri.v2);
                 Gizmos.DrawLine(tri.v2, tri.v0);
-                Gizmos.DrawSphere(check.LocalStart + check.HitResult.hitTime * check.LocalDir, 0.01f);
+                Gizmos.DrawSphere(hitPoint, 0.01f);
+                Gizmos.DrawLine(hitPoint, hitPoint + tri.GetNormal() * 0.3f);
             }
         }
     }
