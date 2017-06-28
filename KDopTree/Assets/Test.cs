@@ -61,6 +61,7 @@ public class Test : MonoBehaviour
                 Gizmos.DrawLine(tri.v0, tri.v1);
                 Gizmos.DrawLine(tri.v1, tri.v2);
                 Gizmos.DrawLine(tri.v2, tri.v0);
+                Gizmos.DrawSphere(check.LocalStart + check.HitResult.hitTime * check.LocalDir, 0.01f);
             }
         }
     }
