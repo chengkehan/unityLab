@@ -12,9 +12,9 @@ public class KDopTree
 
     public const int NUM_PLANES = 3;
 
-    public List<KDopNode> nodes = null;
+    public List<KDopNode> nodes { private set; get; }
 
-    public List<KDopTriangle> triangles = null;
+    public List<KDopTriangle> triangles { private set; get; }
 
     public void Build(Mesh mesh)
     {
@@ -37,14 +37,13 @@ public class KDopTree
         nodes[0] = rootNode;
     }
 
-    public bool LineCheck(KDopCollisionCheck check)
+    public void LineCheck(KDopCollisionCheck check)
     {
         if(nodes == null || nodes.Count == 0)
         {
-            return false;
+            return;
         }
-
-        return nodes[0].LineCheck(check);
+        nodes[0].LineCheck(check, this);
     }
 
     private void BuildTriangles(Mesh mesh)
@@ -94,6 +93,8 @@ public struct KDopNode
     public bool isLeaf;
 
     public KDopNodeData data;
+
+    private static Vector3[] s_trianglePoints = new Vector3[3];
 
     public KDopBounds SplitTriangleList(int startIndex, int numTriangles, KDopTree kDopTree)
     {
@@ -192,9 +193,143 @@ public struct KDopNode
         return boundingVolumes;
     }
 
-    public bool LineCheck(KDopCollisionCheck check)
+    public void LineCheck(KDopCollisionCheck check, KDopTree kDopTree)
     {
-        return false;
+        if(isLeaf)
+        {
+            if (LineCheckBounds(check, kDopTree))
+            {
+                LineCheckTriangles(check, kDopTree);
+            }
+        }
+        else
+        {
+            if(LineCheckBounds(check, kDopTree))
+            {
+                kDopTree.nodes[data.leftNode].LineCheck(check, kDopTree);
+                kDopTree.nodes[data.rightNode].LineCheck(check, kDopTree);
+            }
+        }
+    }
+
+    private void LineCheckTriangles(KDopCollisionCheck check, KDopTree kDopTree)
+    {
+        for(int triIndex = data.startIndex; triIndex < data.startIndex + data.numTriangles; ++triIndex)
+        {
+            KDopTriangle tri = kDopTree.triangles[triIndex];
+            Vector3 trip0 = tri.v0;
+            Vector3 trip1 = tri.v1;
+            Vector3 trip2 = tri.v2;
+
+            Vector3 linep0 = check.LocalStart;
+            Vector3 linep1 = check.LocalEnd;
+
+            // Line is on the same side of triangle-plane
+            Vector3 triNormal = Vector3.Cross(trip1 - trip0, trip2 - trip0);
+            triNormal.Normalize();
+            float triPlaneD = Vector3.Dot(trip0, triNormal);
+            Vector4 triPlane = new Vector4(triNormal.x, triNormal.y, triNormal.z, triPlaneD);
+            float line0D = Vector3.Dot(linep0, triNormal) - triPlaneD;
+            float line1D = Vector3.Dot(linep1, triNormal) - triPlaneD;
+            if (line0D * line1D > 0)
+            {
+                continue;
+            }
+
+            // Figure out the hit point(intersection)
+            float hitTime = line0D / (line0D - line1D);
+            Vector3 lineDir = linep1 - linep0;
+            Vector3 hitP = linep0 + lineDir * hitTime;
+
+            // Check if the point point is inside the triangle
+            s_trianglePoints[0] = trip0;
+            s_trianglePoints[1] = trip1;
+            s_trianglePoints[2] = trip2;
+            for (int sideIndex = 0; sideIndex < 3; ++sideIndex)
+            {
+                Vector3 edge = s_trianglePoints[(sideIndex + 1) % 3] - s_trianglePoints[sideIndex];
+                Vector3 sideDir = Vector3.Cross(triNormal, edge);
+                Vector3 hitDir = hitP - s_trianglePoints[sideIndex];
+                float side = Vector3.Dot(hitDir, sideDir);
+                if (side < 0)
+                {
+                    // Hit point is outside the triangle.
+                    hitTime = float.MaxValue;
+                    break;
+                }
+            }
+
+            if(hitTime < check.HitResult.hitTime)
+            {
+                check.HitResult.hitTime = hitTime;
+                check.HitResult.isHit = true;
+                check.HitResult.hitTriangle = triIndex;
+            }
+        }
+    }
+
+    private bool LineCheckBounds(KDopCollisionCheck check, KDopTree kDopTree)
+    {
+        Vector3 min = boundingVolumes.min;
+        Vector3 max = boundingVolumes.max;
+
+        Vector3 startP = check.LocalStart;
+        Vector3 endP = check.LocalEnd;
+
+        Vector3 dir = check.LocalEnd - check.LocalStart;
+        Vector3 oneOverDir = check.LocalOneOverDir;
+
+        // Slabs
+        float _minSlabX = (min.x - startP.x) * oneOverDir.x;
+        float _minSlabY = (min.y - startP.y) * oneOverDir.y;
+        float _minSlabZ = (min.z - startP.z) * oneOverDir.z;
+
+        float _maxSlabX = (max.x - startP.x) * oneOverDir.x;
+        float _maxSlabY = (max.y - startP.y) * oneOverDir.y;
+        float _maxSlabZ = (max.z - startP.z) * oneOverDir.z;
+
+        // Min/Max Slabs
+        float minSlabX = Mathf.Min(_minSlabX, _maxSlabX);
+        float minSlabY = Mathf.Min(_minSlabY, _maxSlabY);
+        float minSlabZ = Mathf.Min(_minSlabZ, _maxSlabZ);
+
+        float maxSlabX = Mathf.Max(_minSlabX, _maxSlabX);
+        float maxSlabY = Mathf.Max(_minSlabY, _maxSlabY);
+        float maxSlabZ = Mathf.Max(_minSlabZ, _maxSlabZ);
+
+        float minSlab = Mathf.Max(Mathf.Max(minSlabX, minSlabY), minSlabZ);
+        float maxSlab = Mathf.Min(Mathf.Min(maxSlabX, maxSlabY), maxSlabZ);
+
+        bool bHit = maxSlab >= 0.0f && maxSlab >= minSlab && minSlab <= 1.0f;
+        if (bHit)
+        {
+            int hitSurface = 0;
+            if (minSlab >= 0 && minSlab <= 1)
+            {
+                // Draw first hit point
+                ++hitSurface;
+            }
+            if (maxSlab >= 0 && maxSlab <= 1)
+            {
+                // Draw second hit point
+                ++hitSurface;
+            }
+            if (hitSurface == 0)
+            {
+                // line segment inside bounds
+                return true;
+            }
+            else
+            {
+                // line segment hit surface
+                return true;
+            }
+        }
+        else
+        {
+            // line segment hit nothing
+            return false;
+        }
     }
 }
 
@@ -245,7 +380,7 @@ public struct KDopBounds
 
     public Vector3 max;
 
-    public bool isValid;
+    private bool isValid;
 
     public Vector3 Center
     {
@@ -330,45 +465,49 @@ public struct KDopBounds
     }
 }
 
-public struct KDopCollisionCheck
+public class KDopCollisionCheck
 {
-    public Vector3 worldStart;
+    public Vector3 WorldStart { private set; get; }
 
-    public Vector3 worldEnd;
+    public Vector3 WorldEnd { private set; get; }
 
-    public Matrix4x4 worldToLocal;
+    public Matrix4x4 WorldToLocal { private set; get; }
 
-    public KDopHitResult hitResult;
+    public KDopHitResult HitResult { private set; get; }
 
-    public Vector3 localStart;
+    public Vector3 LocalStart { private set; get; }
 
-    public Vector3 localEnd;
+    public Vector3 LocalEnd { private set; get; }
 
-    public Vector3 localDir;
+    public Vector3 LocalDir { private set; get; }
 
-    public Vector3 localOneOverDir;
+    public Vector3 LocalOneOverDir { private set; get; }
 
-    public KDopCollisionCheck(Vector3 worldStart, Vector3 worldEnd, Matrix4x4 worldToLocal)
+    public void Init(Vector3 worldStart, Vector3 worldEnd, Matrix4x4 worldToLocal)
     {
-        this.worldStart = worldStart;
-        this.worldEnd = worldEnd;
-        this.worldToLocal = worldToLocal;
+        this.WorldStart = worldStart;
+        this.WorldEnd = worldEnd;
+        this.WorldToLocal = worldToLocal;
 
-        this.localStart = worldToLocal.MultiplyPoint(worldStart);
-        this.localEnd = worldToLocal.MultiplyPoint(worldEnd);
-        this.localDir = this.localEnd - this.localStart;
-        this.localOneOverDir = this.localDir.Inverse();
+        this.LocalStart = worldToLocal.MultiplyPoint(worldStart);
+        this.LocalEnd = worldToLocal.MultiplyPoint(worldEnd);
+        this.LocalDir = this.LocalEnd - this.LocalStart;
+        this.LocalOneOverDir = this.LocalDir.Inverse();
 
-        hitResult = new KDopHitResult();
-        hitResult.hitTriangle = -1;
+        HitResult = HitResult == null ? new KDopHitResult() : HitResult;
+        HitResult.hitTime = float.MaxValue;
+        HitResult.isHit = false;
+        HitResult.hitTriangle = -1;
     }
 }
 
-public struct KDopHitResult
+public class KDopHitResult
 {
-    public int hitTriangle;
+    public int hitTriangle = 0;
 
-    public float hitTime;
+    public float hitTime = 0;
+
+    public bool isHit = false;
 }
 
 public static class KDopTreeVectorExtension

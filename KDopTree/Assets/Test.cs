@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,16 +9,22 @@ public class Test : MonoBehaviour
     [Range(0, 20)]
     public int depth = 0;
 
+    public Transform linep0 = null;
+
+    public Transform linep1 = null;
+
     private KDopTree kDopTree = null;
 
     private Color[] colors = null;
 
+    private KDopCollisionCheck check = new KDopCollisionCheck();
+
     private void OnDrawGizmos()
     {
-        Gizmos.matrix = mf.transform.localToWorldMatrix;
-
         if(kDopTree != null)
         {
+            Gizmos.matrix = mf.transform.localToWorldMatrix;
+
             List<KDopNode> nodes = kDopTree.nodes;
             int leafCount = 0;
             for(int nodeIndex = 0; nodeIndex < nodes.Count; ++nodeIndex)
@@ -38,6 +43,26 @@ public class Test : MonoBehaviour
                 }
             }
         }
+
+        Gizmos.matrix = Matrix4x4.identity;
+        Gizmos.color = Color.white;
+        Gizmos.DrawLine(linep0.position, linep1.position);
+
+        if (kDopTree != null)
+        {
+            check.Init(linep0.position, linep1.position, mf.transform.worldToLocalMatrix);
+            kDopTree.LineCheck(check);
+            if (check.HitResult.isHit)
+            {
+                KDopTriangle tri = kDopTree.triangles[check.HitResult.hitTriangle];
+
+                Gizmos.matrix = mf.transform.localToWorldMatrix;
+                Gizmos.color = Color.red;
+                Gizmos.DrawLine(tri.v0, tri.v1);
+                Gizmos.DrawLine(tri.v1, tri.v2);
+                Gizmos.DrawLine(tri.v2, tri.v0);
+            }
+        }
     }
 
     private void Start()
@@ -49,7 +74,7 @@ public class Test : MonoBehaviour
         }
 
         kDopTree = new KDopTree();
-        Stopwatch stopWatch = new Stopwatch();
+        System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
         stopWatch.Start();
         kDopTree.Build(mf.mesh);
         stopWatch.Stop();
