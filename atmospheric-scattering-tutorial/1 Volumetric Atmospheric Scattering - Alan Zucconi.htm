@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<!-- saved from url=(0064)https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/ -->
+<html itemscope="itemscope" itemtype="http://schema.org/Article" lang="en-US" class=" "><link type="text/css" id="dark-mode" rel="stylesheet" href="https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="profile" href="https://gmpg.org/xfn/11">
+<link rel="pingback" href="https://www.alanzucconi.com/xmlrpc.php">
+<!--[if lt IE 9]>
+	<script src="https://www.alanzucconi.com/wp-content/themes/independent-publisher/js/html5.js" type="text/javascript"></script>
+	<![endif]-->
+<title>Volumetric Atmospheric Scattering - Alan Zucconi</title>
+<style type="text/css">.acp_wrapper .jcarousel-control-prev {left: 15px; background: #333333;color: #ffffff;box-shadow: none; }.acp_wrapper .jcarousel-control-next {right: 15px; background: #333333;color: #ffffff; box-shadow: none; }.acp_wrapper .jcarousel-control-prev:hover,.acp_wrapper .jcarousel-control-next:hover { background: #000000; color: #ffffff; box-shadow: none;}.acp_wrapper { clear: both; border-radius: 0px; }.paging_btns li.nbox a { height: auto !important; } .paging_btns { list-style: none;  margin: 0 auto!important; padding: 0;  height: auto; text-align: center; } .loader_container .loader { display: block; width: 100px; height: auto; box-shadow: none;} .loader_container { position: absolute; display: none; background: rgba(174,174,174,0.7);}                .button_style a { color: #333333 !important; text-decoration: none !important;display: block; width: 100%; height: 100%; overflow: hidden;} 
+                .button_style { background: #dbdbdb;margin: 10px 2px 10px 0!important; padding:0px; text-align: center; color: #333333 !important;cursor: pointer;overflow: hidden; display: inline-block;border: 1px solid #cccccc!important;} .acp_title_left { float: left; width: 100%;}.acp_content {text-align: justify; clear: both; } .button_style:hover, .button_style:hover *:not(.acp_page_number) { background: #e3e3e3;color: #000000 !important;}.acp_page_number {float: left; font-size:16px;line-height: 47px;padding: 0px 10px; background-color:#777777;color:#FFFFFF;font-weight:bold;font-family:arial }.paging_btns li.active {background: #ffffff !important;color: #333333 !important;cursor: default;border: 1px solid #cccccc !important; }.paging_btns li.active a { color: #333333 !important; cursor: default;} .paging_btns li.nbox { width: auto !important; height: auto !important;padding: 3px; } .paging_btns li.active {cursor: default;} .acp_title {font-size:13px;overflow: hidden; box-sizing: initial; height:47px; line-height:45px; font-family:arial;} 
+				@media screen and (max-width:420px){.acp_title{ font-size:12px!important; } .acp_desc{ font-size:11px!important; }}
+            </style>
+
+<meta name="robots" content="max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+<link rel="canonical" href="https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/">
+<meta property="og:locale" content="en_US">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Volumetric Atmospheric Scattering - Alan Zucconi">
+<meta property="og:description" content="If you have lived long enough on planet Earth, you might have wondered why the sky is usually blue, yet red at sunset. The optical phenomenon which is (mostly) responsible for that is called Rayleigh scattering. This tutorial will explain how to model atmospheric scattering to reproduce many of the visual effects that planets exhibit. …">
+<meta property="og:url" content="https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/">
+<meta property="og:site_name" content="Alan Zucconi">
+<meta property="article:tag" content="atmospheric scattering">
+<meta property="article:tag" content="Mie">
+<meta property="article:tag" content="Rayleight">
+<meta property="article:tag" content="scattering">
+<meta property="article:tag" content="volumetric rendering">
+<meta property="article:section" content="Tutorial">
+<meta property="article:published_time" content="2017-10-10T22:22:21+00:00">
+<meta property="article:modified_time" content="2020-04-01T15:05:43+00:00">
+<meta property="og:updated_time" content="2020-04-01T15:05:43+00:00">
+<meta property="og:image" content="https://www.alanzucconi.com/wp-content/uploads/2017/10/scattering_01.png">
+<meta property="og:image:secure_url" content="https://www.alanzucconi.com/wp-content/uploads/2017/10/scattering_01.png">
+<meta property="og:image:width" content="675">
+<meta property="og:image:height" content="372">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:description" content="If you have lived long enough on planet Earth, you might have wondered why the sky is usually blue, yet red at sunset. The optical phenomenon which is (mostly) responsible for that is called Rayleigh scattering. This tutorial will explain how to model atmospheric scattering to reproduce many of the visual effects that planets exhibit. […]">
+<meta name="twitter:title" content="Volumetric Atmospheric Scattering - Alan Zucconi">
+<meta name="twitter:site" content="@AlanZucconi">
+<meta name="twitter:image" content="https://www.alanzucconi.com/wp-content/uploads/2017/10/scattering_01.png">
+<meta name="twitter:creator" content="@AlanZucconi">
+<script src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/osd.js"></script><script src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/f(5).txt"></script><script src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/f(6).txt" id="google_shimpl"></script><script id="twitter-wjs" src="https://platform.twitter.com/widgets.js"></script><script async="" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/analytics.js"></script><script type="application/ld+json" class="yoast-schema-graph yoast-schema-graph--main">{"@context":"https://schema.org","@graph":[{"@type":["Person","Organization"],"@id":"https://www.alanzucconi.com/#/schema/person/718294304a9199cfa7583bfdf6a6bfca","name":"Alan Zucconi","image":{"@type":"ImageObject","@id":"https://www.alanzucconi.com/#personlogo","inLanguage":"en-US","url":"https://www.alanzucconi.com/wp-content/uploads/2019/09/9GPu3SO5.png","width":264,"height":264,"caption":"Alan Zucconi"},"logo":{"@id":"https://www.alanzucconi.com/#personlogo"},"sameAs":["https://twitter.com/AlanZucconi"]},{"@type":"WebSite","@id":"https://www.alanzucconi.com/#website","url":"https://www.alanzucconi.com/","name":"Alan Zucconi","inLanguage":"en-US","description":"Developer, Lecturer &amp; Science Communicator","publisher":{"@id":"https://www.alanzucconi.com/#/schema/person/718294304a9199cfa7583bfdf6a6bfca"},"potentialAction":[{"@type":"SearchAction","target":"https://www.alanzucconi.com/?s={search_term_string}","query-input":"required name=search_term_string"}]},{"@type":"ImageObject","@id":"https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/#primaryimage","inLanguage":"en-US","url":"https://www.alanzucconi.com/wp-content/uploads/2017/10/scattering_01.png","width":675,"height":372},{"@type":"WebPage","@id":"https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/#webpage","url":"https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/","name":"Volumetric Atmospheric Scattering - Alan Zucconi","isPartOf":{"@id":"https://www.alanzucconi.com/#website"},"inLanguage":"en-US","primaryImageOfPage":{"@id":"https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/#primaryimage"},"datePublished":"2017-10-10T22:22:21+00:00","dateModified":"2020-04-01T15:05:43+00:00","potentialAction":[{"@type":"ReadAction","target":["https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/"]}]},{"@type":"Article","@id":"https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/#article","isPartOf":{"@id":"https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/#webpage"},"author":{"@id":"https://www.alanzucconi.com/#/schema/person/718294304a9199cfa7583bfdf6a6bfca"},"headline":"Volumetric Atmospheric Scattering","datePublished":"2017-10-10T22:22:21+00:00","dateModified":"2020-04-01T15:05:43+00:00","commentCount":"12","mainEntityOfPage":{"@id":"https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/#webpage"},"publisher":{"@id":"https://www.alanzucconi.com/#/schema/person/718294304a9199cfa7583bfdf6a6bfca"},"image":{"@id":"https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/#primaryimage"},"keywords":"atmospheric scattering,Mie,Rayleight,scattering,volumetric rendering","articleSection":"Science,Tutorial","inLanguage":"en-US","potentialAction":[{"@type":"CommentAction","name":"Comment","target":["https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/#respond"]}]}]}</script>
+
+<link rel="dns-prefetch" href="https://s.w.org/">
+<link rel="alternate" type="application/rss+xml" title="Alan Zucconi » Feed" href="https://www.alanzucconi.com/feed/">
+<link rel="alternate" type="application/rss+xml" title="Alan Zucconi » Comments Feed" href="https://www.alanzucconi.com/comments/feed/">
+<link rel="alternate" type="application/rss+xml" title="Alan Zucconi » Volumetric Atmospheric Scattering Comments Feed" href="https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/feed/">
+
+<script type="text/javascript" data-cfasync="false">
+	var mi_version         = '7.10.4';
+	var mi_track_user      = true;
+	var mi_no_track_reason = '';
+	
+	var disableStr = 'ga-disable-UA-1845590-33';
+
+	/* Function to detect opted out users */
+	function __gaTrackerIsOptedOut() {
+		return document.cookie.indexOf(disableStr + '=true') > -1;
+	}
+
+	/* Disable tracking if the opt-out cookie exists. */
+	if ( __gaTrackerIsOptedOut() ) {
+		window[disableStr] = true;
+	}
+
+	/* Opt-out function */
+	function __gaTrackerOptout() {
+	  document.cookie = disableStr + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
+	  window[disableStr] = true;
+	}
+	
+	if ( mi_track_user ) {
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','__gaTracker');
+
+		__gaTracker('create', 'UA-1845590-33', 'auto');
+		__gaTracker('set', 'forceSSL', true);
+		__gaTracker('require', 'displayfeatures');
+		__gaTracker('send','pageview');
+	} else {
+		console.log( "" );
+		(function() {
+			/* https://developers.google.com/analytics/devguides/collection/analyticsjs/ */
+			var noopfn = function() {
+				return null;
+			};
+			var noopnullfn = function() {
+				return null;
+			};
+			var Tracker = function() {
+				return null;
+			};
+			var p = Tracker.prototype;
+			p.get = noopfn;
+			p.set = noopfn;
+			p.send = noopfn;
+			var __gaTracker = function() {
+				var len = arguments.length;
+				if ( len === 0 ) {
+					return;
+				}
+				var f = arguments[len-1];
+				if ( typeof f !== 'object' || f === null || typeof f.hitCallback !== 'function' ) {
+					console.log( 'Not running function __gaTracker(' + arguments[0] + " ....) because you are not being tracked. " + mi_no_track_reason );
+					return;
+				}
+				try {
+					f.hitCallback();
+				} catch (ex) {
+
+				}
+			};
+			__gaTracker.create = function() {
+				return new Tracker();
+			};
+			__gaTracker.getByName = noopnullfn;
+			__gaTracker.getAll = function() {
+				return [];
+			};
+			__gaTracker.remove = noopfn;
+			window['__gaTracker'] = __gaTracker;
+					})();
+		}
+</script>
+
+<script type="text/javascript">
+			window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/12.0.0-1\/72x72\/","ext":".png","svgUrl":"https:\/\/s.w.org\/images\/core\/emoji\/12.0.0-1\/svg\/","svgExt":".svg","source":{"concatemoji":"https:\/\/www.alanzucconi.com\/wp-includes\/js\/wp-emoji-release.min.js?ver=5.4"}};
+			/*! This file is auto-generated */
+			!function(e,a,t){var r,n,o,i,p=a.createElement("canvas"),s=p.getContext&&p.getContext("2d");function c(e,t){var a=String.fromCharCode;s.clearRect(0,0,p.width,p.height),s.fillText(a.apply(this,e),0,0);var r=p.toDataURL();return s.clearRect(0,0,p.width,p.height),s.fillText(a.apply(this,t),0,0),r===p.toDataURL()}function l(e){if(!s||!s.fillText)return!1;switch(s.textBaseline="top",s.font="600 32px Arial",e){case"flag":return!c([127987,65039,8205,9895,65039],[127987,65039,8203,9895,65039])&&(!c([55356,56826,55356,56819],[55356,56826,8203,55356,56819])&&!c([55356,57332,56128,56423,56128,56418,56128,56421,56128,56430,56128,56423,56128,56447],[55356,57332,8203,56128,56423,8203,56128,56418,8203,56128,56421,8203,56128,56430,8203,56128,56423,8203,56128,56447]));case"emoji":return!c([55357,56424,55356,57342,8205,55358,56605,8205,55357,56424,55356,57340],[55357,56424,55356,57342,8203,55358,56605,8203,55357,56424,55356,57340])}return!1}function d(e){var t=a.createElement("script");t.src=e,t.defer=t.type="text/javascript",a.getElementsByTagName("head")[0].appendChild(t)}for(i=Array("flag","emoji"),t.supports={everything:!0,everythingExceptFlag:!0},o=0;o<i.length;o++)t.supports[i[o]]=l(i[o]),t.supports.everything=t.supports.everything&&t.supports[i[o]],"flag"!==i[o]&&(t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&t.supports[i[o]]);t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&!t.supports.flag,t.DOMReady=!1,t.readyCallback=function(){t.DOMReady=!0},t.supports.everything||(n=function(){t.readyCallback()},a.addEventListener?(a.addEventListener("DOMContentLoaded",n,!1),e.addEventListener("load",n,!1)):(e.attachEvent("onload",n),a.attachEvent("onreadystatechange",function(){"complete"===a.readyState&&t.readyCallback()})),(r=t.source||{}).concatemoji?d(r.concatemoji):r.wpemoji&&r.twemoji&&(d(r.twemoji),d(r.wpemoji)))}(window,document,window._wpemojiSettings);
+		</script><script src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/wp-emoji-release.min.js" type="text/javascript" defer=""></script>
+<style type="text/css">
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 .07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+<link rel="stylesheet" id="wp-quicklatex-format-css" href="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/quicklatex-format.css" type="text/css" media="all">
+<link rel="stylesheet" id="crayon-css" href="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/crayon.min.css" type="text/css" media="all">
+<link rel="stylesheet" id="wp-block-library-css" href="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/style.min.css" type="text/css" media="all">
+<link rel="stylesheet" id="quads-style-css-css" href="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/blocks.style.build.css" type="text/css" media="all">
+<link rel="stylesheet" id="acp-jcarousel-css-css" href="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/jcarousel.min.css" type="text/css" media="all">
+<link rel="stylesheet" id="collapseomatic-css-css" href="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/light_style.css" type="text/css" media="all">
+<link rel="stylesheet" id="patreon-wordpress-css-css" href="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/app.css" type="text/css" media="all">
+<link rel="stylesheet" id="genericons-css" href="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/genericons.css" type="text/css" media="all">
+<link rel="stylesheet" id="nprogress-css" href="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/nprogress.css" type="text/css" media="all">
+<link rel="stylesheet" id="independent-publisher-style-css" href="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/style.css" type="text/css" media="all">
+<link rel="stylesheet" id="customizer-css" href="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/admin-ajax.php" type="text/css" media="all">
+<script type="text/javascript" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/jquery.js"></script>
+<script type="text/javascript" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/jquery-migrate.min.js"></script>
+<script type="text/javascript" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/spoiler.min.js"></script>
+<script type="text/javascript">
+/* <![CDATA[ */
+var CrayonSyntaxSettings = {"version":"_2.7.2_beta","is_admin":"0","ajaxurl":"https:\/\/www.alanzucconi.com\/wp-admin\/admin-ajax.php","prefix":"crayon-","setting":"crayon-setting","selected":"crayon-setting-selected","changed":"crayon-setting-changed","special":"crayon-setting-special","orig_value":"data-orig-value","debug":""};
+var CrayonSyntaxStrings = {"copy":"Press %s to Copy, %s to Paste","minimize":"Click To Expand Code"};
+/* ]]> */
+</script>
+<script type="text/javascript" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/crayon.min.js"></script>
+<script type="text/javascript">
+/* <![CDATA[ */
+var monsterinsights_frontend = {"js_events_tracking":"true","download_extensions":"doc,pdf,ppt,zip,xls,docx,pptx,xlsx","inbound_paths":"[{\"path\":\"\\\/go\\\/\",\"label\":\"affiliate\"},{\"path\":\"\\\/recommend\\\/\",\"label\":\"affiliate\"}]","home_url":"https:\/\/www.alanzucconi.com","hash_tracking":"false"};
+/* ]]> */
+</script>
+<script type="text/javascript" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/frontend.min.js"></script>
+<script type="text/javascript" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/frontend.js"></script>
+<script type="text/javascript" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/jquery.jcarousel.min.js"></script>
+<script type="text/javascript">
+/* <![CDATA[ */
+var acpJcarousel = {"wrapType":"first"};
+/* ]]> */
+</script>
+<script type="text/javascript" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/jcresp-fixed.js"></script>
+<script type="text/javascript" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/nprogress.js"></script>
+<script type="text/javascript" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/fade-post-title.js"></script>
+<script type="text/javascript" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/enhanced-comment-form.js"></script>
+<script type="text/javascript" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/wp-quicklatex-frontend.js"></script>
+<link rel="https://api.w.org/" href="https://www.alanzucconi.com/wp-json/">
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://www.alanzucconi.com/xmlrpc.php?rsd">
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="https://www.alanzucconi.com/wp-includes/wlwmanifest.xml">
+<meta name="generator" content="WordPress 5.4">
+<link rel="shortlink" href="https://www.alanzucconi.com/?p=7374">
+<link rel="alternate" type="application/json+oembed" href="https://www.alanzucconi.com/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fwww.alanzucconi.com%2F2017%2F10%2F10%2Fatmospheric-scattering-1%2F">
+<link rel="alternate" type="text/xml+oembed" href="https://www.alanzucconi.com/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fwww.alanzucconi.com%2F2017%2F10%2F10%2Fatmospheric-scattering-1%2F&amp;format=xml">
+<style>@font-face {
+			font-family: 'Libre Franklin Extra Bold';
+			src: url('https://www.alanzucconi.com/wp-content/plugins/patreon-connect/assets/fonts/librefranklin-extrabold-webfont.woff2') format('woff2'),
+				 url('https://www.alanzucconi.com/wp-content/plugins/patreon-connect/assets/fonts/librefranklin-extrabold-webfont.woff') format('woff');
+			font-weight: bold;
+			}</style><link rel="icon" href="https://www.alanzucconi.com/wp-content/uploads/2015/10/cropped-AZ-big-32x32.png" sizes="32x32">
+<link rel="icon" href="https://www.alanzucconi.com/wp-content/uploads/2015/10/cropped-AZ-big-192x192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="https://www.alanzucconi.com/wp-content/uploads/2015/10/cropped-AZ-big-180x180.png">
+<meta name="msapplication-TileImage" content="https://www.alanzucconi.com/wp-content/uploads/2015/10/cropped-AZ-big-270x270.png">
+<script type="text/javascript" src="https://www.alanzucconi.com/wp-content/plugins/wp-spamshield/js/jscripts.php"></script>
+<link rel="preload" href="https://adservice.google.com/adsid/integrator.js?domain=www.alanzucconi.com" as="script"><script type="text/javascript" src="https://adservice.google.com/adsid/integrator.js?domain=www.alanzucconi.com"></script><style data-styled="" data-styled-version="4.2.0"></style><style data-styled="" data-styled-version="4.2.0"></style></head>
+<body class="post-template-default single single-post postid-7374 single-format-standard h-entry hentry" itemscope="itemscope" itemtype="http://schema.org/WebPage">
+<div id="page" class="site">
+<header id="masthead" class="site-header" role="banner" itemscope="" itemtype="http://schema.org/WPHeader">
+<div class="site-header-info">
+<a class="site-logo" href="https://www.alanzucconi.com/">
+<img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/9GPu3SO5-150x150.png" width="100" height="100" alt="Alan Zucconi" class="avatar avatar-100 wp-user-avatar wp-user-avatar-100 alignnone photo"> </a>
+<div class="site-title"><span class="byline"><span class="author p-author vcard h-card"><a class="u-url url fn n" href="https://www.alanzucconi.com/" title="View all posts by Alan Zucconi" rel="author">Alan Zucconi</a></span></span></div>
+<div class="site-description"></div>
+<div id="menu-social" class="menu"><ul id="menu-social-items" class="menu-items"><li id="menu-item-3060" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3060"><a href="https://twitter.com/AlanZucconi"><span class="screen-reader-text">Twitter</span></a></li>
+<li id="menu-item-3062" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3062"><a href="https://www.linkedin.com/in/alanzucconi"><span class="screen-reader-text">LinkedIn</span></a></li>
+</ul></div>
+<div class="site-published-separator"></div>
+<h2 class="site-published">Published</h2>
+<h2 class="site-published-date"><a href="https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/" title="Volumetric Atmospheric Scattering" rel="bookmark"><time class="entry-date dt-published" datetime="2017-10-10T23:22:21+0100" itemprop="datePublished" pubdate="pubdate">October 10, 2017</time></a></h2>
+</div>
+<nav role="navigation" class="site-navigation main-navigation">
+<a class="screen-reader-text skip-link" href="https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/#content" title="Skip to content">Skip to content</a>
+<div class="menu-single-post-menu-container"><ul id="menu-single-post-menu" class="menu"><li id="menu-item-3161" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3161"><a href="https://www.alanzucconi.com/tutorials/">Tutorials</a></li>
+<li id="menu-item-3065" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-3065"><a href="https://www.alanzucconi.com/category/unity/">Unity</a></li>
+<li id="menu-item-3070" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-3070"><a href="https://www.alanzucconi.com/category/shader/">Shader</a></li>
+<li id="menu-item-3069" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-3069"><a href="https://www.alanzucconi.com/category/python-programming/">Python</a></li>
+<li id="menu-item-3067" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-3067"><a href="https://www.alanzucconi.com/category/arduino/">Arduino</a></li>
+<li id="menu-item-3068" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-3068"><a href="https://www.alanzucconi.com/category/machine-learning/">Machine Learning</a></li>
+<li id="menu-item-3066" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-3066"><a href="https://www.alanzucconi.com/category/maths/">Maths for Gamedev</a></li>
+</ul></div>
+</nav>
+</header>
+
+<div id="main" class="site-main">
+<div id="primary" class="content-area">
+<main id="content" class="site-content" role="main">
+<article id="post-7374" class="post-7374 post type-post status-publish format-standard has-post-thumbnail category-science category-tutorial tag-atmospheric-scattering tag-mie tag-rayleight tag-scattering tag-volumetric-rendering" itemscope="itemscope" itemtype="http://schema.org/BlogPosting" itemprop="blogPost">
+<img width="675" height="372" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/scattering_01.png" class="attachment-independent_publisher_post_thumbnail size-independent_publisher_post_thumbnail wp-post-image" alt="" itemprop="image" srcset="https://www.alanzucconi.com/wp-content/uploads/2017/10/scattering_01.png 675w, https://www.alanzucconi.com/wp-content/uploads/2017/10/scattering_01-300x165.png 300w, https://www.alanzucconi.com/wp-content/uploads/2017/10/scattering_01-24x13.png 24w, https://www.alanzucconi.com/wp-content/uploads/2017/10/scattering_01-36x20.png 36w, https://www.alanzucconi.com/wp-content/uploads/2017/10/scattering_01-48x26.png 48w" sizes="(max-width: 675px) 100vw, 675px"> <header class="entry-header">
+<h2 class="entry-title-meta">
+<span class="entry-title-meta-author">
+<span class="byline"><span class="author p-author vcard h-card"><a class="u-url url fn n" href="https://www.alanzucconi.com/" title="View all posts by Alan Zucconi" rel="author">Alan Zucconi</a></span></span> </span>
+in <a href="https://www.alanzucconi.com/category/science/" rel="category tag">Science</a>, <a href="https://www.alanzucconi.com/category/tutorial/" rel="category tag">Tutorial</a> <span class="entry-title-meta-post-date">
+<span class="sep"> | </span>
+<a href="https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/" title="Volumetric Atmospheric Scattering" rel="bookmark"><time class="entry-date dt-published" datetime="2017-10-10T23:22:21+0100" itemprop="datePublished" pubdate="pubdate">October 10, 2017</time></a> </span>
+</h2>
+<h1 class="entry-title p-name" itemprop="name">Volumetric Atmospheric Scattering</h1>
+</header>
+
+<div class="entry-content e-content" itemprop="mainContentOfPage">
+
+<div class="quads-location quads-ad1" id="quads-ad1" style="float:none;margin:10px 0 10px 0;text-align:center;">
+<script async="" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/f(7).txt"></script>
+
+<ins class="adsbygoogle" style="display:inline-block;width:728px;height:90px" data-ad-client="ca-pub-4981507237877510" data-ad-slot="1316612185" data-adsbygoogle-status="done"><ins id="aswift_0_expand" style="display:inline-table;border:none;height:90px;margin:0;padding:0;position:relative;visibility:visible;width:728px;background-color:transparent;"><ins id="aswift_0_anchor" style="display:block;border:none;height:90px;margin:0;padding:0;position:relative;visibility:visible;width:728px;background-color:transparent;"><iframe width="728" height="90" frameborder="0" marginwidth="0" marginheight="0" vspace="0" hspace="0" allowtransparency="true" scrolling="no" allowfullscreen="true" onload="var i=this.id,s=window.google_iframe_oncopy,H=s&amp;&amp;s.handlers,h=H&amp;&amp;H[i],w=this.contentWindow,d;try{d=w.document}catch(e){}if(h&amp;&amp;d&amp;&amp;(!d.body||!d.body.firstChild)){if(h.call){setTimeout(h,0)}else if(h.match){try{h=s.upd(h,i)}catch(e){}w.location.replace(h)}}" id="aswift_0" name="aswift_0" style="left:0;position:absolute;top:0;border:0px;width:728px;height:90px;" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/saved_resource(2).html"></iframe></ins></ins></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+<p>If you have lived long enough on planet Earth, you might have wondered why the sky is usually blue, yet red at sunset. The optical phenomenon which is (mostly) responsible for that is called <strong>Rayleigh scattering</strong>. This tutorial will explain how to model atmospheric scattering to reproduce many of the visual effects that planets exhibit. And if you want to render physically accurate visuals for alien planets, this is <em>definitely</em> the tutorial you’ve been looking for.</p>
+<p><img class="size-full wp-image-7600 aligncenter" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/earth.gif" alt="" width="563" height="563"></p>
+<p>You can find all the post in this series here:</p>
+<ul>
+<li><strong>Part 1. <a href="https://www.alanzucconi.com/?p=7374" target="_blank" rel="noopener noreferrer">Volumetric Atmospheric Scattering</a></strong></li>
+<li>Part 2. <a href="https://www.alanzucconi.com/?p=7404" target="_blank" rel="noopener noreferrer">The Theory Behind Atmospheric Scattering</a></li>
+<li>Part 3.&nbsp;<a href="https://www.alanzucconi.com/?p=7472" target="_blank" rel="noopener noreferrer">The Mathematics of Rayleigh Scattering</a></li>
+<li>Part 4.&nbsp;<a href="https://www.alanzucconi.com/?p=7557" target="_blank" rel="noopener noreferrer">A Journey Through the Atmosphere</a></li>
+<li>Part 5.&nbsp;<a href="https://www.alanzucconi.com/?p=7665" target="_blank" rel="noopener noreferrer">A Shader for the Atmospheric Sphere</a></li>
+<li>Part 6.&nbsp;<a href="https://www.alanzucconi.com/?p=7781" target="_blank" rel="noopener noreferrer">Intersecting The Atmosphere</a></li>
+<li>Part 7.&nbsp;<a href="https://www.alanzucconi.com/?p=7793" target="_blank" rel="noopener noreferrer">Atmospheric Scattering Shader</a></li>
+<li>Part 8.&nbsp;<a href="https://www.alanzucconi.com/?p=7578" target="_blank" rel="noopener noreferrer">An Introduction to Mie Theory</a></li>
+</ul>
+<p>You can refer to the&nbsp;<a href="https://www.alanzucconi.com/?p=7766" target="_blank" rel="noopener noreferrer">Atmospheric Scattering Cheatsheet</a>&nbsp;for a complete reference of all the equations used.</p>
+<p>You can <strong>download</strong> the <strong>Unity package</strong> for this tutorial at the bottom of the page.</p>
+
+<div class="quads-location quads-ad2" id="quads-ad2" style="float:none;margin:10px 0 10px 0;text-align:center;">
+<script async="" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/f(7).txt"></script>
+
+<ins class="adsbygoogle" style="display:inline-block;width:728px;height:90px" data-ad-client="ca-pub-4981507237877510" data-ad-slot="6525540980" data-adsbygoogle-status="done"><ins id="aswift_1_expand" style="display:inline-table;border:none;height:90px;margin:0;padding:0;position:relative;visibility:visible;width:728px;background-color:transparent;"><ins id="aswift_1_anchor" style="display:block;border:none;height:90px;margin:0;padding:0;position:relative;visibility:visible;width:728px;background-color:transparent;"><iframe width="728" height="90" frameborder="0" marginwidth="0" marginheight="0" vspace="0" hspace="0" allowtransparency="true" scrolling="no" allowfullscreen="true" onload="var i=this.id,s=window.google_iframe_oncopy,H=s&amp;&amp;s.handlers,h=H&amp;&amp;H[i],w=this.contentWindow,d;try{d=w.document}catch(e){}if(h&amp;&amp;d&amp;&amp;(!d.body||!d.body.firstChild)){if(h.call){setTimeout(h,0)}else if(h.match){try{h=s.upd(h,i)}catch(e){}w.location.replace(h)}}" id="aswift_1" name="aswift_1" style="left:0;position:absolute;top:0;border:0px;width:728px;height:90px;" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/saved_resource(3).html"></iframe></ins></ins></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+<h4>Introduction</h4>
+<p>What makes atmospheric effects so hard to recreate, is the fact that the sky is not a solid object. Traditional rendering techniques assume that objects are nothing more than an empty shell. All the graphical computation happens only on the material surfaces, regardless of what’s inside. This massive simplification allows rendering solid objects very efficiently. The aspect of certain materials, however, is determined by the fact that light can penetrate them. The final look of <strong>translucent</strong> objects results from the interaction of the light with their internal structure. In most cases, such interaction can be faked very effectively, as seen in the tutorial on <a href="https://www.alanzucconi.com/?p=7053" target="_blank" rel="noopener noreferrer">Fast Subsurface Scattering in Unity</a>. Sadly, this is not the case if we want to recreate a believable sky. Instead of rendering only the “outer shell” of a planet, we need to simulate what happens to the rays of light that pass through the atmosphere. Propagating the calculations inside an object is known as <strong>volumetric rendering</strong>, as is a topic that has been discussed extensively in the <a href="https://www.alanzucconi.com/?p=5159" target="_blank" rel="noopener noreferrer">Volumetric Rendering</a> series. The two techniques that were presented in that series (<strong>raymarching </strong>and<strong> signed distance functions</strong>), cannot be used effectively to simulate atmospheric scattering. This tutorial will introduce a more appropriate approach to render solid translucent objects, often referred as <strong>volumetric&nbsp;single scattering</strong>.</p>
+<h4>Single Scattering</h4>
+<p>In a room without any light, you would expect to see nothing. Objects become visible only when a ray of light bounces off them and hit our eyes. Most gaming engines (such as Unity and Unreal) assume that light travels “in a vacuum”. This means that objects are the only things that can affect light. In reality, light always travels through a medium. In our case, that medium is the air we are breathing. As a result, the way objects look is affected by how much air light is travelling through. On the surface of Earth, the air density is relatively low; its contribution is so tiny that it can only be truly appreciated when light travels great&nbsp;distances. Mountains that are far away blend&nbsp;with the sky, although objects close to us appear virtually unaffected by atmospheric scattering.</p>
+<p>The first step to replicate the optical effects of atmospheric scattering is to understand how light travels through a medium like air. As said before, we can only see something when light hits our eyes. In the context of 3D graphics, our eye is the camera used to render the scene. The molecules that make up&nbsp;the air around us can deflect the light rays traelling through them. Hence, they have the power to alter the way we perceive objects. As a massive simplification, there are two way in which the molecules in the air can affect our vision.</p>
+<h5>Out-Scattering</h5>
+<p>The most obvious way in which air molecules interact with light is by deflecting it, changing its direction. If a ray of light directed to hit the camera is deflected away, we are in front of a process called <strong>out-scattering</strong>.</p>
+<p><img class="size-full wp-image-7379 aligncenter" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/scattering01.png" alt="" width="552" height="169" srcset="https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering01.png 552w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering01-300x92.png 300w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering01-24x7.png 24w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering01-36x11.png 36w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering01-48x15.png 48w" sizes="(max-width: 552px) 100vw, 552px"></p>
+<p>A real light source can emit quadrillions of photons each second, and each one has a certain probability of hitting an air molecule.&nbsp;The denser the medium in which light travels, the more likely it is for a single photon to be deflected. How severely out-scattering affects light also depends on the distance travelled.</p>
+<p><img class="size-full wp-image-7378 aligncenter" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/scattering_04.png" alt="" width="719" height="220" srcset="https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_04.png 719w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_04-300x92.png 300w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_04-700x214.png 700w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_04-24x7.png 24w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_04-36x11.png 36w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_04-48x15.png 48w" sizes="(max-width: 719px) 100vw, 719px"></p>
+<p>Out-scattering causes light to become progressively dimmer, and it depends on both the distance travelled and the air density.</p>
+<span class="collapseomatic  colomat-visited colomat-close" id="id5e92b3ac2cd11" tabindex="" title="❓ Why do particles change the direction of light?">❓ Why do particles change the direction of light?</span>
+<h5>In-Scattering</h5>
+<p>When light is deflected by a particle, it could also happen that is re-directed towards the camera. This is effectively the opposite of out-scattering and, unsurprisingly, is called <strong>in-scattering</strong>.</p>
+<p><img class="size-full wp-image-7380 aligncenter" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/scattering_02.png" alt="" width="483" height="252" srcset="https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_02.png 483w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_02-300x157.png 300w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_02-24x13.png 24w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_02-36x19.png 36w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_02-48x25.png 48w" sizes="(max-width: 483px) 100vw, 483px"></p>
+<p>Under certain conditions, in-scattering allows seeing light sources that are not in the camera’s direct light of sight. Its most obvious optical effect results in light halos around light sources. They are caused by the fact the camera receives both direct and indirect light rays from the same source, de-facto amplifying the number of photons received.</p>
+<p><img class="size-full wp-image-7377 aligncenter" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/scattering_03.png" alt="" width="483" height="252" srcset="https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_03.png 483w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_03-300x157.png 300w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_03-24x13.png 24w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_03-36x19.png 36w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_03-48x25.png 48w" sizes="(max-width: 483px) 100vw, 483px"></p>
+<h4>Volumetric Single Scattering</h4>
+<p>A single ray of light can be deflected an arbitrary number of times. This means that light can travel very complex paths before reaching the camera. This poses a significant challenge, since rendering translucent materials with high fidelity requires to simulate the path of each individual ray of light. This is called <strong>raytracing</strong>, and is currently computationally too expensive for real-time rendering. The technique presented in this tutorial is referred as <strong>single scattering</strong>, since it takes into account only a single scattering event for a ray of light. We will see later how such a simplification still allows obtaining realistic results at a fraction of the cost that real raytracing would have.</p>
+<p>The key to rendering realistic skies is to simulate what happens to light rays when they travel through a planet’s atmosphere. The diagram below shows a camera, looking through a planet. The basic idea behind this rendering technique is to calculate how light travelling from <img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/quicklatex.com-816b613a4f79d4bf9cb51396a9654120_l3.svg" class="ql-img-inline-formula quicklatex-auto-format" alt="A" title="Rendered by QuickLaTeX.com" height="12" width="13" style="vertical-align: 0px;"> to <img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/quicklatex.com-c74288aabc0e2ca280d25d92bf1a1ec2_l3.svg" class="ql-img-inline-formula quicklatex-auto-format" alt="B" title="Rendered by QuickLaTeX.com" height="12" width="14" style="vertical-align: 0px;"> is affected by scattering. This means calculating the contributions that out- and in-scattering have on the light travelling towards the camera. As discussed before, we experience as attenuation due to out-scattering. The amount of light present at each point <img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/quicklatex.com-9cb89ec5a66c95b252c062d768b5f94e_l3.svg" class="ql-img-inline-formula quicklatex-auto-format" alt="P \in \overline{AB}" title="Rendered by QuickLaTeX.com" height="16" width="64" style="vertical-align: -1px;"> has a small chance of being deflected away from the camera.</p>
+<p><img class="size-full wp-image-7385 aligncenter" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/scattering_05.png" alt="" width="605" height="416" srcset="https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_05.png 605w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_05-300x206.png 300w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_05-24x17.png 24w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_05-36x25.png 36w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_05-48x33.png 48w" sizes="(max-width: 605px) 100vw, 605px"></p>
+<p>To correctly account for how much out-scattering occurs at each point <img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/quicklatex.com-fda1e51b12ba3624074fcbebad72b1fc_l3.svg" class="ql-img-inline-formula quicklatex-auto-format" alt="P" title="Rendered by QuickLaTeX.com" height="12" width="14" style="vertical-align: 0px;">, we first need to know how much light was present at <img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/quicklatex.com-fda1e51b12ba3624074fcbebad72b1fc_l3.svg" class="ql-img-inline-formula quicklatex-auto-format" alt="P" title="Rendered by QuickLaTeX.com" height="12" width="14" style="vertical-align: 0px;"> in the first place. Assuming there’s only a single star illuminating the planet, all light that <img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/quicklatex.com-fda1e51b12ba3624074fcbebad72b1fc_l3.svg" class="ql-img-inline-formula quicklatex-auto-format" alt="P" title="Rendered by QuickLaTeX.com" height="12" width="14" style="vertical-align: 0px;"> receives must come from the sun. Some of that light will be subjected to in-scattering, and is accidentally deflected towards the camera:</p>
+<p><img class="wp-image-7826 size-full aligncenter" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/scattering_06a.png" alt="" width="712" height="335" srcset="https://www.alanzucconi.com/wp-content/uploads/2017/10/scattering_06a.png 712w, https://www.alanzucconi.com/wp-content/uploads/2017/10/scattering_06a-300x141.png 300w, https://www.alanzucconi.com/wp-content/uploads/2017/10/scattering_06a-700x329.png 700w, https://www.alanzucconi.com/wp-content/uploads/2017/10/scattering_06a-24x11.png 24w, https://www.alanzucconi.com/wp-content/uploads/2017/10/scattering_06a-36x17.png 36w, https://www.alanzucconi.com/wp-content/uploads/2017/10/scattering_06a-48x23.png 48w" sizes="(max-width: 712px) 100vw, 712px"></p>
+<p>These two steps are enough to approximate most effects that can be observed in the atmosphere.&nbsp;However, things are compilated by the fact that the amount of light that <img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/quicklatex.com-fda1e51b12ba3624074fcbebad72b1fc_l3.svg" class="ql-img-inline-formula quicklatex-auto-format" alt="P" title="Rendered by QuickLaTeX.com" height="12" width="14" style="vertical-align: 0px;"> receives from the sun is itself subjected to out-scattering while travelling through the atmosphere from <img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/quicklatex.com-ed12970f60569db1dfd9f13289854a0d_l3.svg" class="ql-img-inline-formula quicklatex-auto-format" alt="C" title="Rendered by QuickLaTeX.com" height="12" width="14" style="vertical-align: 0px;"> to <img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/quicklatex.com-fda1e51b12ba3624074fcbebad72b1fc_l3.svg" class="ql-img-inline-formula quicklatex-auto-format" alt="P" title="Rendered by QuickLaTeX.com" height="12" width="14" style="vertical-align: 0px;">.</p>
+<p><img class="size-full wp-image-7384 aligncenter" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/scattering_07.png" alt="" width="579" height="272" srcset="https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_07.png 579w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_07-300x141.png 300w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_07-24x11.png 24w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_07-36x17.png 36w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_07-48x23.png 48w" sizes="(max-width: 579px) 100vw, 579px"></p>
+<p>To sum up what we have to do:</p>
+<ul>
+<li>The line of sight of the camera enters the atmosphere at <img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/quicklatex.com-816b613a4f79d4bf9cb51396a9654120_l3.svg" class="ql-img-inline-formula quicklatex-auto-format" alt="A" title="Rendered by QuickLaTeX.com" height="12" width="13" style="vertical-align: 0px;">, and exists it at <img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/quicklatex.com-c74288aabc0e2ca280d25d92bf1a1ec2_l3.svg" class="ql-img-inline-formula quicklatex-auto-format" alt="B" title="Rendered by QuickLaTeX.com" height="12" width="14" style="vertical-align: 0px;">;</li>
+<li>As an approximation, we take into account the contributions of out- and in-scattering as it happens through each point <img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/quicklatex.com-9cb89ec5a66c95b252c062d768b5f94e_l3.svg" class="ql-img-inline-formula quicklatex-auto-format" alt="P \in \overline{AB}" title="Rendered by QuickLaTeX.com" height="16" width="64" style="vertical-align: -1px;">;</li>
+<li>The amount of light <img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/quicklatex.com-fda1e51b12ba3624074fcbebad72b1fc_l3.svg" class="ql-img-inline-formula quicklatex-auto-format" alt="P" title="Rendered by QuickLaTeX.com" height="12" width="14" style="vertical-align: 0px;"> receives comes from the sun;</li>
+<li>The amount of light <img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/quicklatex.com-fda1e51b12ba3624074fcbebad72b1fc_l3.svg" class="ql-img-inline-formula quicklatex-auto-format" alt="P" title="Rendered by QuickLaTeX.com" height="12" width="14" style="vertical-align: 0px;"> receives is subjected to out-scattering, as it travels through the atmosphere <img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/quicklatex.com-a38c3cc141c6a8e1d8097931aa5fa3c2_l3.svg" class="ql-img-inline-formula quicklatex-auto-format" alt="\overline{CP}" title="Rendered by QuickLaTeX.com" height="15" width="28" style="vertical-align: 0px;">;</li>
+<li>A part of the light received by <img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/quicklatex.com-fda1e51b12ba3624074fcbebad72b1fc_l3.svg" class="ql-img-inline-formula quicklatex-auto-format" alt="P" title="Rendered by QuickLaTeX.com" height="12" width="14" style="vertical-align: 0px;"> is subjected to in-scattering, which sends in the direction of the camera;</li>
+<li>A part of the light from <img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/quicklatex.com-fda1e51b12ba3624074fcbebad72b1fc_l3.svg" class="ql-img-inline-formula quicklatex-auto-format" alt="P" title="Rendered by QuickLaTeX.com" height="12" width="14" style="vertical-align: 0px;"> that is directed towards the camera is subjected to out-scattering and deflected away from the line of sight.</li>
+</ul>
+<p><img class="size-full wp-image-7401 aligncenter" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/scattering_08a.png" alt="" width="750" height="361" srcset="https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_08a.png 750w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_08a-300x144.png 300w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_08a-700x337.png 700w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_08a-24x12.png 24w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_08a-36x17.png 36w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_08a-48x23.png 48w" sizes="(max-width: 750px) 100vw, 750px"></p>
+<span class="collapseomatic " id="id5e92b3ac2cdf1" tabindex="" title="❓ This is not the only way light rays can reach the camera!">❓ This is not the only way light rays can reach the camera!</span><div id="target-id5e92b3ac2cdf1" class="collapseomatic_content " style="display: none;">The solution that is proposed in this tutorial accounts for in-scattering along the line of sight <img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/quicklatex.com-01e3f48fa11a50273e3889539222abe7_l3.svg" class="ql-img-inline-formula quicklatex-auto-format" alt="\overline{AB}" title="Rendered by QuickLaTeX.com" height="15" width="28" style="vertical-align: 0px;">. Light reaching a point <img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/quicklatex.com-fda1e51b12ba3624074fcbebad72b1fc_l3.svg" class="ql-img-inline-formula quicklatex-auto-format" alt="P" title="Rendered by QuickLaTeX.com" height="12" width="14" style="vertical-align: 0px;"> from the sun has a certain probability of being deflected towards the camera.<p></p>
+<p>However, there are many more paths that light rays can take to reach the camera. For instance, one of the rays scattered away on its way to <img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/quicklatex.com-fda1e51b12ba3624074fcbebad72b1fc_l3.svg" class="ql-img-inline-formula quicklatex-auto-format" alt="P" title="Rendered by QuickLaTeX.com" height="12" width="14" style="vertical-align: 0px;"> can be scattered back towards the camera in a second collision (diagram below). And there could be rays that reach the camera after being deflected three times. Or four.</p>
+<p><img class="size-full wp-image-7402 aligncenter" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/scattering_09a.png" alt="" width="711" height="334" srcset="https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_09a.png 711w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_09a-300x141.png 300w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_09a-700x329.png 700w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_09a-24x11.png 24w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_09a-36x17.png 36w, https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_09a-48x23.png 48w" sizes="(max-width: 711px) 100vw, 711px"></p>
+<p>This technique is called<strong> single scattering</strong> because it only takes into account the in-scattering that occurs along the line of sight. More advanced techniques can extend this process taking into account other ways in which light can reach the camera. The number of possible paths, however, grows exponentially with the number of scattering events that are taking into consideration. Luckily enough, the probability of hitting the camera also decay exponentially.</p></div>
+<h4>Coming Next…</h4>
+<p>This post introduces the main concepts necessary to create a volumetric shader that reproduces atmospheric scattering. In the next post, we will start formalising these processes.</p>
+<p>I hope you will stay with me for this journey through the atmosphere.</p>
+<p>You can find all the post in this series here:</p>
+<ul>
+<li><strong>Part 1. <a href="https://www.alanzucconi.com/?p=7374" target="_blank" rel="noopener noreferrer">Volumetric Atmospheric Scattering</a></strong></li>
+<li>Part 2. <a href="https://www.alanzucconi.com/?p=7404" target="_blank" rel="noopener noreferrer">The Theory Behind Atmospheric Scattering</a></li>
+<li>Part 3.&nbsp;<a href="https://www.alanzucconi.com/?p=7472" target="_blank" rel="noopener noreferrer">The Mathematics of Rayleigh Scattering</a></li>
+<li>Part 4.&nbsp;<a href="https://www.alanzucconi.com/?p=7557" target="_blank" rel="noopener noreferrer">A Journey Through the Atmosphere</a></li>
+<li>Part 5.&nbsp;<a href="https://www.alanzucconi.com/?p=7665" target="_blank" rel="noopener noreferrer">A Shader for the Atmospheric Sphere</a></li>
+<li>Part 6.&nbsp;<a href="https://www.alanzucconi.com/?p=7781" target="_blank" rel="noopener noreferrer">Intersecting The Atmosphere</a></li>
+<li>Part 7.&nbsp;<a href="https://www.alanzucconi.com/?p=7793" target="_blank" rel="noopener noreferrer">Atmospheric Scattering Shader</a></li>
+<li>Part 8.&nbsp;<a href="https://www.alanzucconi.com/?p=7578" target="_blank" rel="noopener noreferrer">An Introduction to Mie Theory</a></li>
+</ul>
+<p>You can refer to the&nbsp;<a href="https://www.alanzucconi.com/?p=7766" target="_blank" rel="noopener noreferrer">Atmospheric Scattering Cheatsheet</a>&nbsp;for a complete reference of all the equations used.</p>
+<h5>Other Resources</h5>
+<ul>
+<li>Scratchpixel 2.0: <a href="https://www.scratchapixel.com/lessons/procedural-generation-virtual-worlds/simulating-sky/simulating-colors-of-the-sky" target="_blank" rel="noopener noreferrer">Simulating the Colors of the Sky</a></li>
+<li>GPU Gems:&nbsp;<a href="https://developer.nvidia.com/gpugems/GPUGems2/gpugems2_chapter16.html" target="_blank" rel="noopener noreferrer">Accurate Atmospheric Scattering</a></li>
+<li>Atom’s World:&nbsp;<a href="https://atomworld.wordpress.com/2014/12/22/flexible-physical-accurate-atmosphere-scattering-part-1/" target="_blank" rel="noopener noreferrer">Flexible Physical Accurate Atmosphere Scattering</a></li>
+</ul>
+<h4>Download</h4>
+<p><div style="line-height: 0;"><iframe src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/iframe.html" scrolling="no" allowtransparency="true" frameborder="0" class="patreon-widget" title="Patreon Widget" style="position: static; visibility: visible; width: 176px; height: 34px;"></iframe></div><script async="" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/becomePatronButton.bundle.js"></script><br>
+You can download all the assets necessary to reproduce the volumetric atmospheric scattering presented in this tutorial.</p>
+<table>
+<tbody>
+<tr>
+<td style="text-align: center;"><strong>Feature</strong></td>
+<td style="text-align: center;"><a href="https://www.patreon.com/posts/14807027" target="_blank" rel="noopener noreferrer"><strong>Standard</strong></a></td>
+<td style="text-align: center;"><a href="https://www.patreon.com/posts/14806526" target="_blank" rel="noopener noreferrer"><strong>Premium</strong></a></td>
+</tr>
+<tr>
+<td style="text-align: center;">Volumetric Shader</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td style="text-align: center;">Clouds Support</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td style="text-align: center;">Day &amp; Night Cycle</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td style="text-align: center;">Earth 8K</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td style="text-align: center;">Mars 8K</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td style="text-align: center;">Venus 8K</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td style="text-align: center;">Neptune 2K</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td style="text-align: center;">Postprocessing</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Download</strong></td>
+<td style="text-align: center;"><strong><a href="https://www.patreon.com/posts/14807027" target="_blank" rel="noopener noreferrer">Standard</a></strong></td>
+<td style="text-align: center;"><strong><a href="https://www.patreon.com/posts/14806526" target="_blank" rel="noopener noreferrer">Premium</a></strong></td>
+</tr>
+</tbody>
+</table>
+<div class="twentytwenty-wrapper twentytwenty-horizontal"><div class="twentytwenty twentytwenty-container" style="max-width: 100%; width: 864px; height: 488px;"><img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/earth_standard.png" class="twentytwenty-before" style="clip: rect(0px, 335.5px, 488px, 0px);"><img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/earth_premium.png" class="twentytwenty-after"><div class="twentytwenty-overlay"><div class="twentytwenty-before-label"></div><div class="twentytwenty-after-label"></div></div><div class="twentytwenty-handle" style="left: 335.5px;"><span class="twentytwenty-left-arrow"></span><span class="twentytwenty-right-arrow"></span></div></div></div>
+<div style="
+    border-radius: 20px; border: rgba(0,0,0,0.15) solid 1px;
+    background: rgba(219, 219, 219, 0.25);
+    padding-top:5px;
+    padding-left:20px;
+    padding-right:20px;
+    padding-bottom:10px;
+    margin-top: 20px;
+    margin-bottom: 20px;">
+<h5 style="text-align: justify;  margin-top:20px;">💖 Support this blog </h5>
+<p style="text-align: justify;">This websites exists thanks to the contribution of patrons on Patreon. If you think these posts have either helped or inspired you, please consider supporting this blog.</p>
+<div style="display: flex; justify-content: space-between;">
+<div style="text-align: center; vertical-align: top;"></div>
+<div style="text-align: center; vertical-align: top;"><a href="https://www.patreon.com/AlanZucconi" target="_blank"><img class="alignnone size-full wp-image-2844 aligncenter" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/patreon_logo.png" alt="Patreon" width="140" height="140"></a>
+<div style="line-height: 0;"><iframe src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/iframe(1).html" scrolling="no" allowtransparency="true" frameborder="0" class="patreon-widget" title="Patreon Widget" style="position: static; visibility: visible; width: 176px; height: 34px;"></iframe></div><a href="https://www.patreon.com/AlanZucconi" target="_blank" rel="noopener"><script async="" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/becomePatronButton.bundle.js"></script></a>
+</div>
+<div style="text-align: center; vertical-align: top;">
+<a href="https://twitter.com/AlanZucconi" target="_blank"><img class="alignnone size-full wp-image-2844 aligncenter" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/Twitter_logo.png" alt="Twitter_logo" width="140" height="140"></a><a class="twitter-follow-button" href="https://twitter.com/AlanZucconi" data-show-count="false" data-size="large">Follow @AlanZucconi</a>
+<p style="text-align: center;"><script>// <![CDATA[
+!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');
+// ]]&gt;</script></p>
+</div>
+<div style="text-align: center; vertical-align: top;"></div>
+</div>
+<h5 style="text-align: justify; ">📧 Stay updated</h5>
+<p style="text-align: justify;">You will be notified when a new tutorial is relesed!</p>
+<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><form id="mc4wp-form-3" class="mc4wp-form mc4wp-form-4255" method="post" data-id="4255" data-name="Alan Zucconi"><div class="mc4wp-form-fields"><div style="display: table; width:100%;">
+<div style="display: table-row;">
+<div style="display: table-cell;  width:20%">
+<label><strong>Email:</strong></label>
+</div>
+<div style="display: table-cell;  width:60%">
+<input type="email" name="EMAIL" placeholder="Email address" required="" style="width:100%">
+</div>
+<div style="display: table-cell; text-align:right;  width:20%">
+<input type="submit" value="Notify me!">
+</div>
+</div>
+</div></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"></label><input type="hidden" name="_mc4wp_timestamp" value="1586672556"><input type="hidden" name="_mc4wp_form_id" value="4255"><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-3"><div class="mc4wp-response"></div></form>
+<h5 style="text-align: justify;">📝 Licensing</h5>
+<p style="text-align: justify;">You are free to use, adapt and build upon this tutorial for your own projects (even commercially) as long as you credit me.</p>
+<p style="text-align: justify;">You are not allowed to redistribute the content of this tutorial on other platforms. Especially the parts that are only available on Patreon.</p>
+<p style="text-align: justify;">If the knowledge you have gained had a significant impact on your project, a mention in the credit would be very appreciated. ❤️🧔🏻</p>
+</div>
+
+<div class="quads-location quads-ad3" id="quads-ad3" style="float:none;margin:10px 0 10px 0;text-align:center;">
+<script async="" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/f(7).txt"></script>
+
+<ins class="adsbygoogle" style="display:inline-block;width:728px;height:90px" data-ad-client="ca-pub-4981507237877510" data-ad-slot="8002274186" data-adsbygoogle-status="done"><ins id="aswift_2_expand" style="display:inline-table;border:none;height:90px;margin:0;padding:0;position:relative;visibility:visible;width:728px;background-color:transparent;"><ins id="aswift_2_anchor" style="display:block;border:none;height:90px;margin:0;padding:0;position:relative;visibility:visible;width:728px;background-color:transparent;"><iframe width="728" height="90" frameborder="0" marginwidth="0" marginheight="0" vspace="0" hspace="0" allowtransparency="true" scrolling="no" allowfullscreen="true" onload="var i=this.id,s=window.google_iframe_oncopy,H=s&amp;&amp;s.handlers,h=H&amp;&amp;H[i],w=this.contentWindow,d;try{d=w.document}catch(e){}if(h&amp;&amp;d&amp;&amp;(!d.body||!d.body.firstChild)){if(h.call){setTimeout(h,0)}else if(h.match){try{h=s.upd(h,i)}catch(e){}w.location.replace(h)}}" id="aswift_2" name="aswift_2" style="left:0;position:absolute;top:0;border:0px;width:728px;height:90px;" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/saved_resource(4).html"></iframe></ins></ins></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+
+<div class="post-author-bottom">
+<div class="post-author-card">
+<a class="site-logo" href="https://www.alanzucconi.com/">
+<img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/9GPu3SO5-150x150.png" width="100" height="100" alt="Alan Zucconi" class="avatar avatar-100 wp-user-avatar wp-user-avatar-100 alignnone photo"> </a>
+<div class="post-author-info">
+<div class="site-title">
+<span class="byline"><span class="author p-author vcard h-card"><a class="u-url url fn n" href="https://www.alanzucconi.com/" title="View all posts by Alan Zucconi" rel="author">Alan Zucconi</a></span></span> </div>
+<div class="site-description"></div>
+</div>
+<div class="post-published-date">
+<h2 class="site-published">Published</h2>
+<h2 class="site-published-date"><a href="https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/" title="Volumetric Atmospheric Scattering" rel="bookmark"><time class="entry-date dt-published" datetime="2017-10-10T23:22:21+0100" itemprop="datePublished" pubdate="pubdate">October 10, 2017</time></a></h2>
+</div>
+</div>
+</div>
+
+<footer class="entry-meta">
+<div id="share-comment-button" style="display: block;">
+<button>
+<i class="share-comment-icon"></i>Write a Comment </button>
+</div>
+</footer>
+
+</article>
+<div id="commentform-top" style="display: none;"></div> 
+<div id="respond" class="comment-respond" style="display: none;">
+<h3 id="reply-title" class="comment-reply-title"> <small><a rel="nofollow" id="cancel-comment-reply-link" href="https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/" style="display:none;">Cancel Reply</a></small></h3><form action="https://www.alanzucconi.com/wp-comments-post.php" method="post" id="commentform" class="comment-form"><div id="main-reply-title"><h3>Write a Comment</h3></div><div class="comment-form-reply-title"><p>Comment</p></div><p class="comment-form-comment" id="comment-form-field"><textarea id="comment" name="comment" cols="60" rows="6" aria-required="true" minlength="15" maxlength="15360"></textarea></p><p class="comment-form-author"><label for="author">Name</label><input id="author" name="author" type="text" value="" aria-required="true"></p>
+<p class="comment-form-email"><label for="email">Email</label><input id="email" name="email" type="text" value="" aria-required="true"></p>
+<p class="comment-form-url"><label for="url">Website</label><input id="url" name="url" type="text" value=""></p>
+<p class="form-submit"><input name="submit" type="submit" id="submit" class="submit" value="Submit Comment"> <input type="hidden" name="comment_post_ID" value="7374" id="comment_post_ID">
+<input type="hidden" name="comment_parent" id="comment_parent" value="0">
+</p>
+<noscript><input type="hidden" name="JS04X7" value="NS1" /></noscript>
+<noscript><p><strong>Currently you have JavaScript disabled. In order to post comments, please make sure JavaScript and Cookies are enabled, and reload the page.</strong> <a href="http://enable-javascript.com/" rel="nofollow external" >Click here for instructions on how to enable JavaScript in your browser.</a></p></noscript>
+</form> </div>
+<div id="comments" class="comments-area">
+<ol class="commentlist">
+<li class="comment even thread-even depth-1 u-comment h-cite" id="li-comment-2176">
+<article id="comment-2176" class="comment">
+<footer>
+<div class="comment-author vcard">
+<img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/a051cafc8a1221ac0fb4c1f7ff609604.png" width="48" height="48" alt="Avatar" class="avatar avatar-48wp-user-avatar wp-user-avatar-48 alignnone photo avatar-default"> <cite class="fn">Sean</cite> </div>
+
+<div class="comment-meta commentmetadata">
+<a href="https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/#comment-2176">
+<time pubdate="" datetime="2017-10-13T18:12:01+01:00">
+October 13, 2017 </time>
+</a>
+</div>
+
+</footer>
+<div class="comment-content "><p>Hey Alan, I am super excited for this tutorial. one thing I noticed is the cheat sheet seems to be a deadlink.</p>
+</div>
+<div class="reply">
+<a rel="nofollow" class="comment-reply-link" href="https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/#comment-2176" data-commentid="2176" data-postid="7374" data-belowelement="comment-2176" data-respondelement="respond" aria-label="Reply to Sean">Reply to Sean</a> </div>
+
+</article>
+<ul class="children">
+<li class="comment byuser comment-author-admin bypostauthor odd alt depth-2 u-comment h-cite" id="li-comment-2178">
+<article id="comment-2178" class="comment">
+<footer>
+<div class="comment-author vcard">
+<img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/9GPu3SO5-150x150.png" width="48" height="48" alt="Alan Zucconi" class="avatar avatar-48 wp-user-avatar wp-user-avatar-48 alignnone photo"> <cite class="fn"><a href="https://www.alanzucconi.com/" rel="external nofollow ugc" class="url">Alan Zucconi</a></cite> </div>
+
+<div class="comment-meta commentmetadata">
+<a href="https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/#comment-2178">
+<time pubdate="" datetime="2017-10-16T14:16:17+01:00">
+October 16, 2017 </time>
+</a>
+</div>
+
+</footer>
+<div class="comment-content "><p>Oh yeah, sorry about that!<br>
+I haven’t finished that yet hehe!</p>
+</div>
+<div class="reply">
+<a rel="nofollow" class="comment-reply-link" href="https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/#comment-2178" data-commentid="2178" data-postid="7374" data-belowelement="comment-2178" data-respondelement="respond" aria-label="Reply to Alan Zucconi">Reply to Alan</a> </div>
+
+</article>
+<ul class="children">
+<li class="comment even depth-3 u-comment h-cite" id="li-comment-2497">
+<article id="comment-2497" class="comment">
+<footer>
+<div class="comment-author vcard">
+<img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/b73e173a3e4cb7c12ae7ea35e3afe26a.jpeg" width="48" height="48" alt="Avatar" class="avatar avatar-48wp-user-avatar wp-user-avatar-48 alignnone photo avatar-default"> <cite class="fn"><a href="https://www.3dgep.com/" rel="external nofollow ugc" class="url">Jeremiah van Oosten</a></cite> </div>
+
+<div class="comment-meta commentmetadata">
+<a href="https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/#comment-2497">
+<time pubdate="" datetime="2018-11-02T10:06:56+00:00">
+November 2, 2018 </time>
+</a>
+</div>
+
+</footer>
+<div class="comment-content "><p>One year later and the link to the cheatsheet is still dead!</p>
+</div>
+<div class="reply">
+<a rel="nofollow" class="comment-reply-link" href="https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/#comment-2497" data-commentid="2497" data-postid="7374" data-belowelement="comment-2497" data-respondelement="respond" aria-label="Reply to Jeremiah van Oosten">Reply to Jeremiah</a> </div>
+
+</article>
+<ul class="children">
+<li class="comment byuser comment-author-admin bypostauthor odd alt depth-4 u-comment h-cite" id="li-comment-2500">
+<article id="comment-2500" class="comment">
+<footer>
+<div class="comment-author vcard">
+<img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/9GPu3SO5-150x150.png" width="48" height="48" alt="Alan Zucconi" class="avatar avatar-48 wp-user-avatar wp-user-avatar-48 alignnone photo"> <cite class="fn"><a href="https://www.alanzucconi.com/" rel="external nofollow ugc" class="url">Alan Zucconi</a></cite> </div>
+
+<div class="comment-meta commentmetadata">
+<a href="https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/#comment-2500">
+<time pubdate="" datetime="2018-11-02T12:28:25+00:00">
+November 2, 2018 </time>
+</a>
+</div>
+
+</footer>
+<div class="comment-content "><p>Hi Jeremiah!</p>
+<p>Sorry about that. I prioritise the content that is most requested, and unfortunately there have been other topics that my audience have strongly requested. I understand this might be frustrating, but it takes an incredibly long amount of time to create quality content, so I try to focus on what is most requested at any given time.</p>
+</div>
+<div class="reply">
+<a rel="nofollow" class="comment-reply-link" href="https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/#comment-2500" data-commentid="2500" data-postid="7374" data-belowelement="comment-2500" data-respondelement="respond" aria-label="Reply to Alan Zucconi">Reply to Alan</a> </div>
+
+</article>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="comment even thread-odd thread-alt depth-1 u-comment h-cite" id="li-comment-2857">
+<article id="comment-2857" class="comment">
+<footer>
+<div class="comment-author vcard">
+<img src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/f7ce7c7979ad18281095eb7e9ae46963.png" width="48" height="48" alt="Avatar" class="avatar avatar-48wp-user-avatar wp-user-avatar-48 alignnone photo avatar-default"> <cite class="fn">sahil</cite> </div>
+
+<div class="comment-meta commentmetadata">
+<a href="https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/#comment-2857">
+<time pubdate="" datetime="2020-03-03T22:00:43+00:00">
+March 3, 2020 </time>
+</a>
+</div>
+
+</footer>
+<div class="comment-content "><p>3 years since, and the link is still dead.</p>
+</div>
+<div class="reply">
+<a rel="nofollow" class="comment-reply-link" href="https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/#comment-2857" data-commentid="2857" data-postid="7374" data-belowelement="comment-2857" data-respondelement="respond" aria-label="Reply to sahil">Reply to sahil</a> </div>
+
+</article>
+</li>
+</ol>
+<div id="share-comment-button-bottom" style="display: block;">
+<button>
+<i class="share-comment-icon"></i>Write a Comment </button>
+</div>
+<div id="commentform-bottom" style="display: none;"></div> 
+<div id="webmentions" class="mentions-list">
+<h3>Webmentions</h3>
+<li class="pingback odd alt thread-even depth-1 u-comment h-cite" id="li-comment-2880">
+<cite class="fn"><a href="https://www.alanzucconi.com/2020/03/30/mathematics-epidemics/" rel="external nofollow ugc" class="url">The Mathematics of Epidemics - Alan Zucconi</a></cite> <small>March 3, 2020</small>
+<p>[…] As a Science Communicator—one which family has been affected—I feel is important I take this opportunity to add my contribution to the current discourse. Not the one surrounding COVID-19 (for which I am not really qualified to talk about), but the study and simulation of epidemics. Since 2015, I have talked extensively about the power of simulations, and how they could be used to solve a variety of different problem. From simulating the process of evolution by natural selection (Evolutionary Computation) to harnessing the power of modern GPUs (How to Use Shaders for Simulations), up to the creating photorealistic rendering of a planet’s sky (Volumetric Atmospheric Scattering). […]</p>
+</li>
+<li class="pingback even thread-odd thread-alt depth-1 u-comment h-cite" id="li-comment-2747">
+<cite class="fn"><a href="https://infos.by/perevod-realistichnaya-kaustika-otrazhenij/" rel="external nofollow ugc" class="url">[Перевод] Реалистичная каустика отражений | INFOS.BY</a></cite> <small>March 3, 2020</small>
+<p>[…] (например, про объёмное атмосф&amp;… [перевод на […]</p>
+</li>
+<li class="pingback odd alt thread-even depth-1 u-comment h-cite" id="li-comment-2746">
+<cite class="fn"><a href="http://bimnews.ru/marketing/perevod-realistichnaya-kaustika-otrazhenij/" rel="external nofollow ugc" class="url">[Перевод] Реалистичная каустика отражений</a></cite> <small>March 3, 2020</small>
+<p>[…] и технически сложные серии статей (например, про объёмное атмосферное рассеяние света [перевод на Хабре] и инверсную кинематику [первая и […]</p>
+</li>
+<li class="pingback even thread-odd thread-alt depth-1 u-comment h-cite" id="li-comment-2742">
+<cite class="fn"><a href="https://www.alanzucconi.com/2019/09/13/believable-caustics-reflections/" rel="external nofollow ugc" class="url">Believable Caustics Reflections - Alan Zucconi</a></cite> <small>March 3, 2020</small>
+<p>[…] I usually focus on longer, more technical series (such as Volumetric Atmospheric Scattering and Inverse Kinematics), I could not resist the temptation of writing a short and sweet tutorial […]</p>
+</li>
+<li class="pingback odd alt thread-even depth-1 u-comment h-cite" id="li-comment-2580">
+<cite class="fn"><a href="https://www.alanzucconi.com/2016/07/01/volumetric-rendering/" rel="external nofollow ugc" class="url">Volumetric Rendering - Alan Zucconi</a></cite> <small>March 3, 2020</small>
+<p>[…] If you are interested in volumetric rendering for non-solid&nbsp;materials (clouds, smoke, …) or transparent ones (water, glass, …) the topic is discussed in the&nbsp;Atmospheric Volumetric Scattering&nbsp;series! […]</p>
+</li>
+<li class="pingback even thread-odd thread-alt depth-1 u-comment h-cite" id="li-comment-2174">
+<cite class="fn"><a href="https://hanecci.com/2017/10/12/single-atmospheric-scattering-part1/" rel="external nofollow ugc" class="url">Single Atmospheric Scattering Part1 via @AlanZucconi | hanecci's blog : はねっちブログ</a></cite> <small>March 3, 2020</small>
+<p>[…] “Article” […]</p>
+</li>
+<li class="pingback odd alt thread-even depth-1 u-comment h-cite" id="li-comment-2173">
+<cite class="fn"><a href="https://hanecci.com/2017/10/12/volumetric-atmospheric-scattering-part1-via-alanzucconi/" rel="external nofollow ugc" class="url">Volumetric Atmospheric Scattering Part1 via @AlanZucconi | hanecci's blog : はねっちブログ</a></cite> <small>March 3, 2020</small>
+<p>[…] “Article” […]</p>
+</li>
+</div>
+</div>
+<div id="taglist"><ul class="taglist"><li class="taglist-title">Related Content by Tag</li><li><a href="https://www.alanzucconi.com/tag/atmospheric-scattering/" rel="tag">atmospheric scattering</a></li><li><a href="https://www.alanzucconi.com/tag/mie/" rel="tag">Mie</a></li><li><a href="https://www.alanzucconi.com/tag/rayleight/" rel="tag">Rayleight</a></li><li><a href="https://www.alanzucconi.com/tag/scattering/" rel="tag">scattering</a></li><li><a href="https://www.alanzucconi.com/tag/volumetric-rendering/" rel="tag">volumetric rendering</a></li></ul></div>
+</main>
+
+</div>
+<div id="secondary" class="widget-area" role="complementary">
+</div>
+</div>
+<footer id="colophon" class="site-footer" itemscope="itemscope" itemtype="http://schema.org/WPFooter" role="contentinfo">
+<div class="site-info">
+<a href="http://independentpublisher.me/" rel="designer" title="Independent Publisher: A beautiful reader-focused WordPress theme, for you.">Independent Publisher</a> empowered by <a href="https://wordpress.org/" rel="generator" title="WordPress: A free open-source publishing platform">WordPress</a> </div>
+
+</footer>
+</div>
+<script type="text/javascript">
+var colomatduration = 'fast';
+var colomatslideEffect = 'slideFade';
+var colomatpauseInit = '';
+var colomattouchstart = '';
+</script>
+<style>
+.collapseomatic /*inactive/collapsed */
+{
+    border-radius: 10px;
+    border: rgba(0,0,0,0.15) solid 1px;
+    background:  rgba(219, 219, 219, 0.25);
+    padding-left: 10px;
+    padding-right: 20px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+
+.collapseomatic_content
+{
+   border-style: solid;
+   border-left-width: 2px;
+    border-left-color:  rgba(0,0,0,0.15);
+    padding-left: 8px;
+    padding-top: 4px;
+    margin-left: 20px;
+}
+</style>
+<script type="text/javascript">
+/* <![CDATA[ */
+r3f5x9JS=escape(document['referrer']);
+hf4N='8a072d43c70c14914595f76e268942f2';
+hf4V='302fa5ecceadef90309b8dc79759877c';
+cm4S="form[action='https://www.alanzucconi.com/wp-comments-post.php']";
+jQuery(document).ready(function($){var e="#commentform, .comment-respond form, .comment-form, "+cm4S+", #lostpasswordform, #registerform, #loginform, #login_form, #wpss_contact_form";$(e).submit(function(){$("<input>").attr("type","hidden").attr("name","r3f5x9JS").attr("value",r3f5x9JS).appendTo(e);$("<input>").attr("type","hidden").attr("name",hf4N).attr("value",hf4V).appendTo(e);return true;});$("#comment").attr({minlength:"15",maxlength:"15360"})});
+/* ]]> */
+</script>
+<script>(function() {function maybePrefixUrlField() {
+	if (this.value.trim() !== '' && this.value.indexOf('http') !== 0) {
+		this.value = "http://" + this.value;
+	}
+}
+
+var urlFields = document.querySelectorAll('.mc4wp-form input[type="url"]');
+if (urlFields) {
+	for (var j=0; j < urlFields.length; j++) {
+		urlFields[j].addEventListener('blur', maybePrefixUrlField);
+	}
+}
+})();</script> 
+<div class="bar" role="bar"></div>
+<script type="text/javascript">
+			NProgress.start();
+
+			setTimeout(function () {
+
+				NProgress.done();
+
+				jQuery('.fade').removeClass('out');
+
+			}, 1000);
+
+			jQuery("#b-0").click(function () {
+				NProgress.start();
+			});
+			jQuery("#b-40").click(function () {
+				NProgress.set(0.4);
+			});
+			jQuery("#b-inc").click(function () {
+				NProgress.inc();
+			});
+			jQuery("#b-100").click(function () {
+				NProgress.done();
+			});
+		</script>
+
+<link rel="stylesheet" id="twentytwenty-twentytwenty-css" href="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/twentytwenty.css" type="text/css" media="all"><iframe id="google_osd_static_frame_1707434418441" name="google_osd_static_frame" style="display: none; width: 0px; height: 0px;" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/saved_resource(5).html"></iframe>
+<script type="text/javascript" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/collapse.js"></script>
+<script type="text/javascript" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/app.js"></script>
+<script type="text/javascript">
+/* <![CDATA[ */
+var qpprFrontData = {"linkData":{"https:\/\/www.alanzucconi.com\/twitter\/":[1,0,""],"https:\/\/www.alanzucconi.com\/stilltimegame\/":[0,0,"http:\/\/www.stilltimegame.com\/alpha"],"https:\/\/www.alanzucconi.com\/education\/":[0,0,""],"https:\/\/www.alanzucconi.com\/games\/0rbitalis\/":[0,0,""]},"siteURL":"https:\/\/www.alanzucconi.com","siteURLq":"https:\/\/www.alanzucconi.com"};
+/* ]]> */
+</script>
+<script type="text/javascript" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/qppr_frontend_script.min.js"></script>
+<script type="text/javascript" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/skip-link-focus-fix.js"></script>
+<script type="text/javascript" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/comment-reply.min.js"></script>
+<script type="text/javascript" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/jscripts-ftr-min.js"></script>
+<script type="text/javascript" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/wp-embed.min.js"></script>
+<script type="text/javascript" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/jquery.event.move.js"></script>
+<script type="text/javascript" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/jquery.twentytwenty.js"></script>
+<script type="text/javascript" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/public.js"></script>
+<script type="text/javascript" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/forms.min.js"></script>
+
+
+<ins class="adsbygoogle adsbygoogle-noablate" data-adsbygoogle-status="done" style="display: none !important;"><ins id="aswift_3_expand" style="display:inline-table;border:none;height:0px;margin:0;padding:0;position:relative;visibility:visible;width:0px;background-color:transparent;"><ins id="aswift_3_anchor" style="display:block;border:none;height:0px;margin:0;padding:0;position:relative;visibility:visible;width:0px;background-color:transparent;"><iframe frameborder="0" marginwidth="0" marginheight="0" vspace="0" hspace="0" allowtransparency="true" scrolling="no" allowfullscreen="true" onload="var i=this.id,s=window.google_iframe_oncopy,H=s&amp;&amp;s.handlers,h=H&amp;&amp;H[i],w=this.contentWindow,d;try{d=w.document}catch(e){}if(h&amp;&amp;d&amp;&amp;(!d.body||!d.body.firstChild)){if(h.call){setTimeout(h,0)}else if(h.match){try{h=s.upd(h,i)}catch(e){}w.location.replace(h)}}" id="aswift_3" name="aswift_3" style="left:0;position:absolute;top:0;border:0px;width:0px;height:0px;" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/saved_resource(6).html"></iframe></ins></ins></ins></body><iframe id="google_esf" name="google_esf" src="./1 Volumetric Atmospheric Scattering - Alan Zucconi_files/zrt_lookup.html" data-ad-client="ca-pub-4981507237877510" style="display: none;"></iframe></html>

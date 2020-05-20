@@ -1,0 +1,19 @@
+@font-face {
+  font-family: 'America';
+  font-style: normal;
+  font-weight: 400;
+  src: local('America Regular'),
+       local('America-Regular'),
+       url(https://c5.patreon.com/external/fonts/gt-america/GT-America-Standard-Regular.woff2) format('woff2'),
+       url(https://c5.patreon.com/external/fonts/gt-america/GT-America-Standard-Regular.woff) format('woff');
+}
+
+@font-face {
+  font-family: 'America';
+  font-style: normal;
+  font-weight: 700;
+  src: local('America Bold'),
+       local('America-Bold'),
+       url(https://c5.patreon.com/external/fonts/gt-america/GT-America-Standard-Bold.woff2) format('woff2'),
+       url(https://c5.patreon.com/external/fonts/gt-america/GT-America-Standard-Bold.woff) format('woff');
+}

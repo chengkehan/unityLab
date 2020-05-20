@@ -1,0 +1,4 @@
+jQuery(document).ready(function($){$('#acp_paging_menu >:not(li)').remove();init_buttons_width();function init_buttons_width(){var width=$('.acp_wrapper').innerWidth();var newWidth;var caruselWidth=width;var isNumeric=$('ul.paging_btns li').hasClass('nbox');var itemsFullWidth;if(!isNumeric){if(width<500){width=(width/2)-2;}
+else if(width>=500&&width<=750){width=width/3;}
+else if(width>750){width=width/4;}
+width=width-2;$('ul.paging_btns li.button_style').css('width',width+'px');}else{var numericItemsWidth=$('ul.paging_btns li.nbox').outerWidth(true);$('ul.paging_btns li.button_style').css('width','auto');$('ul.paging_btns li.button_style').css('height','auto');}}});
