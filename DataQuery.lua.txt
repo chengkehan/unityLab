@@ -1,0 +1,613 @@
+-- 数据查询
+-- 查询 DataCenter 和 Config 的数据
+
+local query = {}
+
+query.GetMainChapterById = function(id)
+    return main_chapter[id]
+end
+
+query.GetCharacterById = function(id)
+    return character[id]
+end
+
+query.GetMainMonsterById = function(id)
+    return main_monster[id]
+end
+
+--通过character中的kind_id（id）
+query.GetGeneralBykindId = function(kind_id)
+    for i, v in pairs(character) do
+        if kind_id == v.id then
+            return v;
+        end
+    end
+end
+
+--通过skill表中的id获取技能
+query.GetSkillById = function(id)
+    return skill[id]
+end
+
+--通过skill_buff表中的id获取技能
+query.GetBuffById = function(id)
+    return skill_buff[id]
+end
+
+--通过arms_kind获取兵种
+query.GetArmNameForKind_id = function(id)
+    if id == ARMS_KIND.SWORD then
+        return textPool.common_arm_Sword
+    end
+    if id == ARMS_KIND.HORSE then
+        return textPool.common_arm_Horse
+    end
+    if id == ARMS_KIND.SPEAR then
+        return textPool.common_arm_Spear
+    end
+    if id == ARMS_KIND.BOW then
+        return textPool.common_arm_Bow
+    end
+
+end
+
+--获取阵营文字
+query.GetFactionByfaction = function(faction)
+    if faction == FACTION.WEI then
+        return textPool.common_faction_Wei
+    end
+    if faction == FACTION.SHU then
+        return textPool.common_faction_Shu
+    end
+    if faction == FACTION.WU then
+        return textPool.common_faction_Wu
+    end
+    if faction == FACTION.QUN then
+        return textPool.common_faction_Qun
+    end
+    if faction == FACTION.HAN then
+        return textPool.common_faction_Han
+    end
+end
+
+-- 战报文字
+query.GetWarReportTextById = function(id)
+    return war_report[id].desc
+end
+
+-- 当前战报最大回合数
+query.eChapterBattleRes_maxRound = function()
+    return dataCenter.eChapterBattleRes.max_round
+end
+
+-- 当前战报里一共有几场子战报
+query.eChapterBattleRes_numSubBattles = function()
+    return #dataCenter.eChapterBattleRes.battle_info_list
+end
+
+-- 获得一场子战报的数据
+query.eChapterBattleRes_getSubBattleData = function(index)
+    local subBattleData = dataCenter.eChapterBattleRes.battle_info_list[index]
+    subBattleData = util.deep_copy(subBattleData)
+
+    -- 测试
+    --if subBattleData.defender.forward == nil then
+    --    subBattleData.defender.forward = util.deep_copy(subBattleData.defender.camp)
+    --    subBattleData.defender.forward.id = 547843
+    --end
+    --if subBattleData.defender.middle == nil then
+    --    subBattleData.defender.middle = util.deep_copy(subBattleData.defender.camp)
+    --    subBattleData.defender.middle.id = 646464
+    --end
+
+    return subBattleData
+end
+
+-- 当前子战报是胜利还是失败
+query.eChapterBattleRes_subBattleWinOrLose = function(index)
+    local subBattleData = query.eChapterBattleRes_getSubBattleData(index)
+    return subBattleData.result_info.winner == subBattleData.attacker.id
+end
+
+-- 整场战报胜利还是失败
+query.eChapterBattleRes_winOrLose = function()
+    local subBattleData = query.eChapterBattleRes_getSubBattleData(query.eChapterBattleRes_numSubBattles())
+    return subBattleData.result_info.winner == subBattleData.attacker.id
+end
+
+-- 当前战报的详细文字描述
+-- 返回一个数组，数组每一项是一个字符串，把字符串直接显示在 InlineText UI 上即可
+-- 每两场战报由一个空字符串分割
+query.eChapterBattleRes_DetailText = function()
+    return query.eChapterBattleRes_SpecifiedDetailText(dataCenter.eChapterBattleRes)
+end
+-- 指定一场战报的详细文字描述
+query.eChapterBattleRes_SpecifiedDetailText = function(battleRes)
+    local detailTextList = {}
+    for subBattleIndex = 1, #battleRes.battle_info_list do
+        local subBattleData = battleRes.battle_info_list[subBattleIndex]
+        local allRounds = subBattleData.report_info
+        for roundI = 1, #allRounds do
+            local aRound = allRounds[roundI]
+            local textList = aRound.text_infos
+            if textList ~= nil then
+                for textI = 1, #textList do
+                    local text = textList[textI]
+                    table.insert(detailTextList, query.eChapterBattleRes_ConvertLineText(text))
+                end
+            end
+        end
+        -- 分隔符
+        if subBattleIndex ~= #battleRes.battle_info_list then
+            table.insert(detailTextList, "")
+        end
+    end
+    return detailTextList
+end
+-- 战报数据里的一条文字描述转换成富文本字符串
+query.eChapterBattleRes_ConvertLineText = function(text)
+    local textId = text.text_id
+    local textArgs = text.text_args
+    local textTempl = dataQuery.GetWarReportTextById(textId)
+    local richTxt = nil
+    if textArgs == nil then
+        richTxt = richText.ConvertDescription(textTempl, 0, false)
+    else
+        richTxt = richText.ConvertDescription(textTempl, 0, false, table.unpack(textArgs))
+    end
+    if text.is_top ~= true then
+        richTxt = "       " .. richTxt
+    end
+    return richTxt
+end
+
+-- 判断播放技能时要不要黑频
+query.SkillIsBlackScreen = function(skillId)
+    local skillData = query.GetSkillById(skillId)
+    if skillData.type == 4 then
+        return false
+    end
+    return true
+end
+
+-- 判断技能是不是掉血技能
+query.SkillIsLoseHp = function(skillId)
+    local skillData = query.GetSkillById(skillId)
+    if skillData.type == 1 then
+        -- 物理
+        return true
+    end
+    if skillData.type == 2 then
+        -- 谋略
+        return true
+    end
+    return false
+end
+
+-- 判断技能是不是回血技能
+query.SkillIsAddHp = function(skillId)
+    local skillData = query.GetSkillById(skillId)
+    if skillData.type == 3 then
+        -- 治疗
+        return true
+    end
+    return false
+end
+
+-- 判断一个buff是不是掉血buff
+-- 详细看策划的skil_buff表
+query.BuffIsLoseHp = function(buffId)
+    local buffData = query.GetBuffById(buffId)
+    if buffData.type == 321 then
+        -- 持续掉血
+        return true
+    end
+    if buffData.type == 322 then
+        -- 持续掉血(叠加)
+        return true
+    end
+    if buffData.type == 323 then
+        -- 火攻状态
+        return true
+    end
+    if buffData.type == 125 then
+        -- 援护效果
+        return true
+    end
+    if buffData.type == 126 then
+        -- 分摊效果
+        return true
+    end
+    return false
+end
+
+-- 判断一个buff是不是回血buff
+-- 详细看策划的skil_buff表
+query.BuffIsAddHp = function(buffId)
+    local buffData = query.GetBuffById(buffId)
+    if buffData.type == 120 then
+        -- 持续回血
+        return true
+    end
+    if buffData.type == 121 then
+        -- 持续回血(叠加)
+        return true
+    end
+    if buffData.type == 122 then
+        -- 伤害吸血
+        return true
+    end
+    return false
+end
+
+--通过skill中的main_type获取技能类型文字
+query.GetSkillTypeByskillType = function(skillType)
+    if skillType == SkillType.ZHUDONG then
+        return textPool.skillType_ZhuDong
+    end
+    if skillType == SkillType.BEIDONG then
+        return textPool.skillType_BeiDong
+    end
+    if skillType == SkillType.ZHIHUI then
+        return textPool.skillType_ZhiHui
+    end
+    if skillType == SkillType.ZHUIJI then
+        return textPool.skillType_ZhuiJi
+    end
+end
+
+--通过skill中的target_type获取技能释放目标的文字
+query.GetSkillTargetByskillTarget = function(skillTarget)
+    if skillTarget == SkillTarget.DiFang then
+        return textPool.skillTarget_difang
+    end
+    if skillTarget == SkillTarget.DiQun then
+        return textPool.skillTarget_diqun
+    end
+    if skillTarget == SkillTarget.ZiJi then
+        return textPool.skillTarget_ziji
+    end
+    if skillTarget == SkillTarget.DuiYou then
+        return textPool.skillTarget_duiyou
+    end
+end
+--[[分割字符串加入表中]]
+---@param str 字符串
+---@param split 分割符
+query.LuaSplit = function(str, split)
+    local lcSubStrTab = {}
+    if str ~= "" then
+        while true do
+            local lcPos = string.find(str, split)
+            if not lcPos then
+                lcSubStrTab[#lcSubStrTab + 1] = str
+                break
+            end
+            local lcSubStr = string.sub(str, 1, lcPos - 1)
+            lcSubStrTab[#lcSubStrTab + 1] = lcSubStr
+            str = string.sub(str, lcPos + 1, #str)
+        end
+    end
+    return lcSubStrTab
+end
+--[[通过字符串得到兵种表]]
+query.GetSkillArmTypeByStr = function(str)
+    local ArmType = dataQuery.LuaSplit(str, ",")
+    local Arm = {}
+    if #ArmType == 0 then
+        Arm = { 1, 2, 3, 4 }
+    else
+        for i = 1, #ArmType do
+            table.insert(Arm, tonumber(ArmType[i]))
+        end
+    end
+    return Arm
+end
+query.GetSkillPanelCardLevelForSkillQuality = function(quality)
+    local Card = {}
+    local cardLevel
+    local plan
+
+    if quality >= 5 then
+        cardLevel = 4
+        plan = 5
+    end
+    if quality == 4 then
+        cardLevel = 4
+        plan = 10
+    end
+    if quality == 3 then
+        cardLevel = 3
+        plan = 10
+    end
+    table.insert(Card, cardLevel)
+    table.insert(Card, plan)
+    return Card
+
+end
+
+--通过武将的faction获取营地AB包中的Sprite Name
+query.GetCountryStringByFaction = function(faction)
+    local str
+    if faction == FACTION.WEI then
+        str = GeneralCountry.Wei
+    else
+        if faction == FACTION.SHU then
+            str = GeneralCountry.Shu
+        else
+            if faction == FACTION.WU then
+                str = GeneralCountry.Wu
+            else
+                if faction == FACTION.QUN then
+                    str = GeneralCountry.Qun
+                else
+                    if faction == FACTION.HAN then
+                        str = GeneralCountry.Han
+                    end
+                end
+            end
+        end
+    end
+    return str
+end
+
+--通过武将的arms_kind获取兵种AB包中的Sprite Name
+query.GetTroopStringByArms_kind = function(arms_kind)
+    local str
+    if arms_kind == ARMS_KIND.BOW then
+        str = TroopIcon.arm_Bow
+    else
+        if arms_kind == ARMS_KIND.HORSE then
+            str = TroopIcon.arm_Horse
+        else
+            if arms_kind == ARMS_KIND.SPEAR then
+                str = TroopIcon.arm_Spear
+            else
+                if arms_kind == ARMS_KIND.SWORD then
+                    str = TroopIcon.arm_Sword
+                end
+            end
+        end
+    end
+    return str
+end
+
+--通过武将的星级获取武将背景框
+query.GetGeneralBgByGeneralStar = function(star)
+    local str
+    if star == StarClass.Blue then
+        str = GeneralBg.Blue
+    else
+        if star == StarClass.Orange then
+            str = GeneralBg.Orange
+        else
+            if star == StarClass.Purple then
+                str = GeneralBg.Purple
+            else
+                if star == StarClass.Red then
+                    str = GeneralBg.Red
+                end
+            end
+        end
+    end
+    return str
+end
+--通过武将在TeamList中的索引值来获取AB中图片
+query.GetGeneralTeamStringByIndex = function(index)
+    local str
+    if teamNumber == 1 then
+        str = GeneralTeamImg.One
+    else
+        if teamNumber == 2 then
+            str = GeneralTeamImg.Two
+        else
+            if teamNunber == 3 then
+                str = GeneralTeamImg.Three
+            else
+                if teamNunber == 4 then
+                    str = GeneralTeamImg.Four
+                else
+                    if teamNunber == 5 then
+                        str = GeneralTeamImg.Five
+                    end
+                end
+            end
+        end
+    end
+end
+
+query.SetTipInfo = function(_type, _info)
+    TipType_Show = _type   --正在使用的提示类型
+    TipType_Content = _info
+end
+query.SetTip_PopUp_Info = function(_info, _time)
+    TipPopUp_Content = _info
+    TipPopUp_showTime = _time
+end
+query.SetTip_GetGoods = function(_data)
+    if _data == nil then
+        TipType.GetGoods = {}
+    else
+        for i = 1, #_data do
+            table.insert(TipType.GetGoods, _data[i])
+        end
+    end
+end
+
+--判断体力是否足够
+query.isEnoughTili = function(num, currTilli)
+    dataCenter.saodangNum = math.floor(dataCenter.UserStamina / (currTilli * num))
+    if dataCenter.saodangNum <= 0 then
+        dataCenter.BuyTip = 0
+        dataCenter.Item_Id = Item_ID.tilidan
+        uiMgr:openWindow(WindowSprites.BuyTip, UIWindowsTYpe.NormalLayer)
+        return false
+    end
+    return true
+end
+
+--判断扫荡次数是否足够
+query.isEnoughCishu = function()
+    local num = 1
+    for i = 1, #dataCenter.m_ChapterInfo.chapter_list do
+        if tostring(dataCenter.chapter_levelId) == tostring(dataCenter.m_ChapterInfo.chapter_list[i].id) then
+            num = dataCenter.m_ChapterInfo.chapter_list[i].remain_battle_times
+        end
+    end
+    if num <= 0 then
+        dataCenter.BuyTip = 1
+        uiMgr:openWindow(WindowSprites.BuyTip, UIWindowsTYpe.NormalLayer)
+        return false
+    end
+    if dataCenter.saodangNum >= num then
+        dataCenter.saodangNum = num
+    end
+    return true
+end
+--时间格式转化
+query.timestamp = function(ct)
+    local t = os.date("*t", ct)
+    return string.format(" %02d:%02d:%02d", t.hour, t.min, t.sec)
+end
+--时间格式转化 --->秒数转化
+query.SecondsToTime = function(ts)
+    local hour = math.floor(ts / 3600)
+    local min = math.floor((ts - hour * 3600) / 60)
+    local seconds = ts - hour * 3600 - min * 60
+    local str = ""
+    str = hour .. ":" .. string.format("%02d", min) .. ":" .. string.format("%02d", seconds)
+    return str
+end
+--时间格式转化 --->秒数转化
+query.timestamp1 = function(ct)
+    local t = os.date("*t", ct)
+    return string.format("%02d-%02d %02d:%02d:%02d", t.month, t.day, t.hour, t.min, t.sec)
+end
+-- 主城建筑配置
+query.GetCityBuildById = function(id)
+    return city_build[id]
+end
+-- 获取字符串的长度（任何单个字符长度都为1）
+query.GetStringLength = function(inputstr)
+    if not inputstr or type(inputstr) ~= "string" or #inputstr <= 0 then
+        return nil
+    end
+    local length = 0  -- 字符的个数
+    local i = 1
+    while true do
+        local curByte = string.byte(inputstr, i)
+        local byteCount = 1
+        if curByte > 239 then
+            byteCount = 4  -- 4字节字符
+        elseif curByte > 223 then
+            byteCount = 3  -- 汉字
+        elseif curByte > 128 then
+            byteCount = 2  -- 双字节字符
+        else
+            byteCount = 1  -- 单字节字符
+        end
+        i = i + byteCount
+        length = length + 1
+        if i > #inputstr then
+            break
+        end
+    end
+    return length
+end
+query.LongNumToText=function(Num) ---数字展示
+if Num~=nil then
+    if Num>=100000 and Num<100000000 then
+        return string.format("%.1f",Num/10000) .."万"
+    elseif Num>=100000000 then
+        return string.format("%.1f",Num/100000000) .."亿"
+    else
+        return tostring(Num)
+    end
+else
+    return ""
+end
+
+end
+query.GetProperty=function(str)
+    if str=="WU" then
+        return textPool.common_wu
+    elseif  str=="TO" then
+        return textPool.common_tong
+    elseif  str=="ZE" then
+        return textPool.common_zheng
+    elseif  str=="FA" then
+        return textPool.common_fang
+    elseif  str=="MO" then
+        return textPool.common_mou
+    elseif  str=="SU" then
+        return textPool.common_su
+    elseif  str=="PJ" then
+        return textPool.common_POJI
+    elseif  str=="BJ" then
+        return textPool.common_BAOJI
+    elseif  str=="GD" then
+        return textPool.common_GEDANG
+    elseif  str=="RX" then
+        return textPool.common_RENXIN
+    elseif  str=="NO" then
+        return textPool.common_NO
+    end
+end
+query.GetNameForNum=function(str)
+    if     str==1 then
+        return textPool.common_wu
+    elseif  str==2 then
+        return textPool.common_fang
+    elseif  str==3 then
+        return textPool.common_tong
+    elseif  str==4 then
+        return textPool.common_mou
+    elseif  str==5 then
+        return textPool.common_su
+    elseif  str==6 then
+        return textPool.common_zheng
+    elseif  str==7 then
+        return textPool.common_POJI
+    elseif  str==8 then
+        return textPool.common_GEDANG
+    elseif  str==9 then
+        return textPool.common_BAOJI
+    elseif  str==10 then
+        return textPool.common_RENXIN
+    end
+end
+
+-- 获取协议返回的状态码对应的文本
+query.GetResponseTxt = function(code)
+    for k, v in pairs(pbrespTxt) do
+        if v.code == code then
+            return v.txt
+        end
+    end
+    return nil
+end
+
+----------------联盟相关--------------------------
+query.SetSelfData = function(data)   ---设置联盟玩家自己的信息
+    if data==nil then return end
+    dataCenter.zhiwei_num.fu_mengzhu = 0
+    dataCenter.zhiwei_num.junshi = 0
+    dataCenter.zhiwei_num.guanyuan= 0
+    for i =1 , #data   do
+        if data[i].post==dataCenter.zhiwei_fu_mengzhu then
+            dataCenter.zhiwei_num.fu_mengzhu = dataCenter.zhiwei_num.fu_mengzhu+1
+        elseif data[i].post==dataCenter.zhiwei_junshi then
+            dataCenter.zhiwei_num.junshi = dataCenter.zhiwei_num.junshi+1
+        elseif data[i].post==dataCenter.zhiwei_guanyuan then
+            dataCenter.zhiwei_num.guanyuan= dataCenter.zhiwei_num.guanyuan+1
+        end
+    end
+    for i =1, #data do
+        if dataCenter.Player_uid==data[i].id then
+            dataCenter.Union_selfData = data[i]
+            return
+        end
+    end
+end
+return query
+
