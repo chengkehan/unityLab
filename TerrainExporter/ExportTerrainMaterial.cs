@@ -52,6 +52,16 @@ public class ExportTerrainMaterial : EditorWindow
                         mtrl.SetTextureScale(propName, new Vector2(1 / layer.tileSize.x * terrain.size.x, 1 / layer.tileSize.y * terrain.size.z));
                     }
                 }
+                if(layers.Length == 3)
+                {
+                    mtrl.EnableKeyword("_SPLAT3");
+                    mtrl.DisableKeyword("_SPLAT2");
+                }
+                if(layers.Length == 2)
+                {
+                    mtrl.EnableKeyword("_SPLAT2");
+                    mtrl.DisableKeyword("_SPLAT3");
+                }
 
                 AssetDatabase.CreateAsset(mtrl, fileName);
                 AssetDatabase.ImportAsset(fileName);

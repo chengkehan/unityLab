@@ -59,6 +59,19 @@ class ExportTerrain : EditorWindow
 
             Export(true, fileName);
             AssetDatabase.Refresh();
+
+            fileName = fileName.Substring(Application.dataPath.Length);
+            fileName = "Assets" + fileName;
+            ModelImporter modelImporter = AssetImporter.GetAtPath(fileName) as ModelImporter;
+            modelImporter.materialImportMode = ModelImporterMaterialImportMode.None;
+            modelImporter.animationType = ModelImporterAnimationType.None;
+            modelImporter.importAnimation = false;
+            modelImporter.importBlendShapes = false;
+            modelImporter.importBlendShapeNormals = ModelImporterNormals.None;
+            modelImporter.importVisibility = false;
+            modelImporter.importCameras = false;
+            modelImporter.importLights = false;
+            modelImporter.SaveAndReimport();
         }
     }
 

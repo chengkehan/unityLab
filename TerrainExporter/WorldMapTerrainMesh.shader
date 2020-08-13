@@ -16,6 +16,7 @@
 
         CGPROGRAM
         #pragma surface surf Lambert
+        #pragma shader_feature _SPLAT3 _SPLAT2
 
         sampler2D _Control;
         sampler2D _Splat1;
@@ -36,8 +37,12 @@
             half4 splat_control = tex2D(_Control, IN.uv_Control);
             half4 mixedDiffuse = half4(0,0,0,1);
             mixedDiffuse += splat_control.r * tex2D(_Splat1, IN.uv_Splat1);
+            #if defined(_SPLAT2) || defined(_SPLAT3)
             mixedDiffuse += splat_control.g * tex2D(_Splat2, IN.uv_Splat2);
+            #endif
+            #if defined(_SPLAT3)
             mixedDiffuse += splat_control.b * tex2D(_Splat3, IN.uv_Splat3);
+            #endif
             o.Albedo = mixedDiffuse.rgb;
             o.Alpha = 1;
         }
